@@ -99,7 +99,7 @@ git push origin main
 ### 4.1. Обновите версию в `build.gradle.kts`
 
 ```kotlin
-version = "1.0.3"  // Увеличьте версию
+version = "1.0.4"  // Увеличьте версию
 ```
 
 ### 4.2. Создайте и запушьте тег
@@ -107,12 +107,12 @@ version = "1.0.3"  // Увеличьте версию
 ```bash
 # Коммит с новой версией
 git add build.gradle.kts
-git commit -m "chore: bump version to 1.0.3"
+git commit -m "chore: bump version to 1.0.4"
 git push origin main
 
 # Создание и пуш тега (это запустит publish workflow)
-git tag -a v1.0.3 -m "Release v1.0.3"
-git push origin v1.0.3
+git tag -a v1.0.4 -m "Release v1.0.4"
+git push origin v1.0.4
 ```
 
 ### 4.3. Проверьте публикацию
@@ -162,7 +162,7 @@ export GRADLE_PUBLISH_SECRET="ваш-секрет"
 
 ```kotlin
 plugins {
-    id("com.nzr.impactanalysis") version "1.0.3"
+    id("com.nzr.impactanalysis") version "1.0.4"
 }
 ```
 

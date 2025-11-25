@@ -12,7 +12,7 @@ This document describes how the plugin is implemented and how to deploy it in a 
 
 ```
 impact-analysis-plugin/
-├── src/main/kotlin/com/nzr/impact_analysis/
+├── src/main/kotlin/com/nzr/impactanalysis/
 │   ├── ImpactAnalysisPlugin.kt              ✅ Main plugin class
 │   ├── extension/
 │   │   └── ImpactAnalysisExtension.kt       ✅ DSL configuration
@@ -126,7 +126,7 @@ In root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.nzr.impact-analysis") version "1.0.1"
+    id("com.nzr.impactanalysis") version "1.0.4"
 }
 
 impactAnalysis {
@@ -215,7 +215,7 @@ In target project's root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.nzr.impact-analysis") version "1.0.1"
+    id("com.nzr.impactanalysis") version "1.0.4"
 }
 
 impactAnalysis {
