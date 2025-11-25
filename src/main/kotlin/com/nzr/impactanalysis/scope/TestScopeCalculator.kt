@@ -8,7 +8,7 @@ import com.nzr.impactanalysis.model.TestType
 import org.gradle.api.Project
 
 /**
- * Калькулятор scope тестов на основе изменений
+ * Test scope calculator based on changes
  */
 class TestScopeCalculator(
     private val rootProject: Project,
@@ -18,16 +18,16 @@ class TestScopeCalculator(
 ) {
 
     /**
-     * Рассчитать какие тесты нужно запустить
+     * Calculate which tests need to be run
      */
     fun calculateTestScope(changedFiles: List<ChangedFile>): Map<TestType, List<String>> {
         val result = mutableMapOf<TestType, List<String>>()
 
-        // Определяем затронутые модули
+        // Determine affected modules
         val directlyAffectedModules = changedFiles.mapNotNull { it.module }.toSet()
         val allAffectedModules = dependencyGraph.getAffectedModules(directlyAffectedModules)
 
-        // Проверяем критические файлы
+        // Check critical files
         val criticalPaths = extension.criticalPaths.get()
         val hasCriticalChanges = changedFiles.any { file ->
             dependencyAnalyzer.isConfigFile(file.path) ||
@@ -35,14 +35,14 @@ class TestScopeCalculator(
         }
 
         if (hasCriticalChanges && extension.runAllTestsOnCriticalChanges) {
-            // Запускаем все тесты во всех модулях
+            // Run all tests in all modules
             return getAllTestsForModules(allAffectedModules)
         }
 
-        // Определяем типы тестов для каждого затронутого модуля
+        // Determine test types for each affected module
         extension.testTypeRules.forEach { (testType, rule) ->
             val modulesToTest = when {
-                // Если изменены файлы, соответствующие правилу
+                // If changed files match the rule
                 changedFiles.any { file -> rule.shouldRunForFile(file.path) } -> {
                     if (rule.runOnlyInChangedModules) {
                         directlyAffectedModules
@@ -59,7 +59,7 @@ class TestScopeCalculator(
             }
         }
 
-        // Если нет специфичных правил, запускаем unit тесты
+        // If no specific rules, run unit tests
         if (result.isEmpty() && extension.runUnitTestsByDefault) {
             result[TestType.UNIT] = generateTestTasks(allAffectedModules, TestType.UNIT)
         }
@@ -68,7 +68,7 @@ class TestScopeCalculator(
     }
 
     /**
-     * Получить все тесты для модулей
+     * Get all tests for modules
      */
     private fun getAllTestsForModules(modules: Set<String>): Map<TestType, List<String>> {
         val result = mutableMapOf<TestType, List<String>>()
@@ -81,7 +81,7 @@ class TestScopeCalculator(
     }
 
     /**
-     * Сгенерировать имена задач для запуска тестов
+     * Generate task names for running tests
      */
     private fun generateTestTasks(modules: Set<String>, testType: TestType): List<String> {
         return modules.mapNotNull { modulePath ->
@@ -99,24 +99,24 @@ class TestScopeCalculator(
     }
 
     /**
-     * Проверить, есть ли у модуля задача для данного типа тестов
+     * Check if module has a task for given test type
      */
     private fun hasTestTask(project: Project, testType: TestType): Boolean {
-        // Проверяем наличие задачи после evaluation
+        // Check for task presence after evaluation
         return try {
             if (project.state.executed) {
                 project.tasks.findByName(testType.taskSuffix) != null
             } else {
-                // Если проект еще не evaluated, предполагаем что задача есть
+                // If project not yet evaluated, assume task exists
                 true
             }
         } catch (e: Exception) {
-            true // В случае ошибки предполагаем что задача есть
+            true // In case of error, assume task exists
         }
     }
 
     /**
-     * Определить приоритетные модули для тестирования
+     * Determine priority modules for testing
      */
     fun getPriorityModules(changedFiles: List<ChangedFile>): List<String> {
         val moduleScores = mutableMapOf<String, Int>()
@@ -125,7 +125,7 @@ class TestScopeCalculator(
             val module = file.module ?: return@forEach
             val score = moduleScores.getOrDefault(module, 0)
 
-            // Увеличиваем приоритет в зависимости от типа изменения
+            // Increase priority based on change type
             val increment = when {
                 dependencyAnalyzer.isTestFile(file.path) -> 1
                 dependencyAnalyzer.isConfigFile(file.path) -> 5

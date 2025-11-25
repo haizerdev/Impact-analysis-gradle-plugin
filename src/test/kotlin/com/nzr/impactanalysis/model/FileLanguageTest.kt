@@ -5,7 +5,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 /**
- * Unit тесты для FileLanguage
+ * Unit tests for FileLanguage
  */
 class FileLanguageTest {
 

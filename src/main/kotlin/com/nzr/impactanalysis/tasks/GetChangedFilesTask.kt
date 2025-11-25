@@ -10,7 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 
 /**
- * Задача для получения списка измененных файлов
+ * Task for getting list of changed files
  */
 abstract class GetChangedFilesTask : DefaultTask() {
 
@@ -40,7 +40,7 @@ abstract class GetChangedFilesTask : DefaultTask() {
             project.layout.buildDirectory.file("impact-analysis/changed-files.txt")
         )
 
-        // Отключаем up-to-date проверку, т.к. таска зависит от Git состояния
+        // Disable up-to-date check, as task depends on Git state
         outputs.upToDateWhen { false }
     }
 
@@ -50,7 +50,7 @@ abstract class GetChangedFilesTask : DefaultTask() {
         val gitClient = GitClient(project.rootProject.projectDir)
 
         try {
-            // Получаем изменения
+            // Get changes
             val changes = mutableListOf<GitDiffEntry>()
 
             if (includeUncommittedChanges.get()) {
@@ -66,7 +66,7 @@ abstract class GetChangedFilesTask : DefaultTask() {
                 logger.warn("Failed to get changes: ${e.message}")
             }
 
-            // Фильтруем по расширениям если указаны
+            // Filter by extensions if specified
             val extensions = fileExtensions.orNull
             val filteredFiles = if (extensions != null && extensions.isNotEmpty()) {
                 changes.filter { change ->
@@ -79,7 +79,7 @@ abstract class GetChangedFilesTask : DefaultTask() {
 
             logger.lifecycle("Found ${filteredFiles.size} changed files")
 
-            // Сохраняем результат
+            // Save result
             val file = outputFile.get().asFile
             file.parentFile.mkdirs()
 

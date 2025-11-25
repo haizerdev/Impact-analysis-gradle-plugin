@@ -5,14 +5,14 @@ import org.gradle.api.Project
 import java.io.File
 
 /**
- * Анализатор зависимостей для определения затронутых модулей
+ * Dependency analyzer for determining affected modules
  */
 class DependencyAnalyzer(private val rootProject: Project) {
 
     private val modulePathCache = mutableMapOf<String, String?>()
 
     /**
-     * Определить модуль, к которому относится файл
+     * Determine which module a file belongs to
      */
     fun getModuleForFile(filePath: String): String? {
         if (modulePathCache.containsKey(filePath)) {
@@ -21,8 +21,8 @@ class DependencyAnalyzer(private val rootProject: Project) {
 
         val file = File(rootProject.projectDir, filePath)
         if (!file.exists() && !file.absolutePath.contains("/build/")) {
-            // Файл удален или не существует
-            // Пытаемся определить модуль по пути
+            // File is deleted or doesn't exist
+            // Try to infer module from path
             val modulePath = inferModuleFromPath(filePath)
             modulePathCache[filePath] = modulePath
             return modulePath
@@ -34,26 +34,26 @@ class DependencyAnalyzer(private val rootProject: Project) {
     }
 
     /**
-     * Получить модули, затронутые изменениями
+     * Get modules affected by changes
      */
     fun getAffectedModules(changedFiles: List<ChangedFile>): Set<String> {
         return changedFiles.mapNotNull { it.module }.toSet()
     }
 
     /**
-     * Найти модуль для файла, проверяя иерархию директорий
+     * Find module for file by checking directory hierarchy
      */
     private fun findModuleForFile(file: File): String? {
         var currentDir = file.parentFile
 
         while (currentDir != null && currentDir.path.startsWith(rootProject.projectDir.path)) {
-            // Ищем build.gradle или build.gradle.kts
+            // Look for build.gradle or build.gradle.kts
             val hasBuildFile = currentDir.listFiles()?.any {
                 it.name == "build.gradle" || it.name == "build.gradle.kts"
             } ?: false
 
             if (hasBuildFile) {
-                // Нашли директорию модуля
+                // Found module directory
                 val relativePath = currentDir.relativeTo(rootProject.projectDir).path
                 return pathToModuleName(relativePath)
             }
@@ -61,21 +61,21 @@ class DependencyAnalyzer(private val rootProject: Project) {
             currentDir = currentDir.parentFile
         }
 
-        return null // Файл в корне проекта
+        return null // File in project root
     }
 
     /**
-     * Попытаться определить модуль по пути файла
+     * Try to infer module from file path
      */
     private fun inferModuleFromPath(filePath: String): String? {
         val parts = filePath.split(File.separator, "/")
 
-        // Проверяем, есть ли модуль с таким именем
+        // Check if module with this name exists
         if (parts.isNotEmpty()) {
             val potentialModule = ":${parts[0]}"
             val project = rootProject.findProject(potentialModule)
             if (project != null) {
-                // Если есть больше уровней вложенности
+                // If there are more nesting levels
                 for (i in 1 until parts.size) {
                     val nestedModule = ":" + parts.take(i + 1).joinToString(":")
                     val nestedProject = rootProject.findProject(nestedModule)
@@ -93,7 +93,7 @@ class DependencyAnalyzer(private val rootProject: Project) {
     }
 
     /**
-     * Преобразовать путь в имя модуля Gradle
+     * Convert path to Gradle module name
      */
     private fun pathToModuleName(relativePath: String): String {
         if (relativePath.isEmpty() || relativePath == ".") {
@@ -103,7 +103,7 @@ class DependencyAnalyzer(private val rootProject: Project) {
     }
 
     /**
-     * Проверить, является ли файл тестовым
+     * Check if file is a test file
      */
     fun isTestFile(filePath: String): Boolean {
         val normalizedPath = filePath.replace("\\", "/")
@@ -119,7 +119,7 @@ class DependencyAnalyzer(private val rootProject: Project) {
     }
 
     /**
-     * Проверить, является ли файл конфигурационным
+     * Check if file is a configuration file
      */
     fun isConfigFile(filePath: String): Boolean {
         val fileName = File(filePath).name

@@ -16,7 +16,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 
 /**
- * Задача для расчета impact analysis
+ * Task for calculating impact analysis
  */
 abstract class CalculateImpactTask : DefaultTask() {
 
@@ -38,12 +38,12 @@ abstract class CalculateImpactTask : DefaultTask() {
         group = "impact analysis"
         description = "Calculate impact analysis based on Git changes"
 
-        // По умолчанию сохраняем результат в build/impact-analysis/result.json
+        // Save result to build/impact-analysis/result.json by default
         outputFile.convention(
             project.layout.buildDirectory.file("impact-analysis/result.json")
         )
 
-        // Отключаем up-to-date проверку, т.к. таска зависит от Git состояния
+        // Disable up-to-date check, as task depends on Git state
         outputs.upToDateWhen { false }
     }
 
@@ -51,7 +51,7 @@ abstract class CalculateImpactTask : DefaultTask() {
     fun execute() {
         val extension = project.extensions.getByType(ImpactAnalysisExtension::class.java)
 
-        // Создаем компоненты
+        // Create components
         val gitClient = GitClient(project.rootProject.projectDir)
         val dependencyGraph = ModuleDependencyGraph(project.rootProject)
         val dependencyAnalyzer = DependencyAnalyzer(project.rootProject)
@@ -63,7 +63,7 @@ abstract class CalculateImpactTask : DefaultTask() {
         )
 
         try {
-            // Получаем изменения из Git
+            // Get changes from Git
             val gitChanges = mutableListOf<GitDiffEntry>()
 
             if (includeUncommittedChanges.get()) {
@@ -85,7 +85,7 @@ abstract class CalculateImpactTask : DefaultTask() {
                 return
             }
 
-            // Конвертируем в ChangedFile
+            // Convert to ChangedFile
             val changedFiles = gitChanges.map { gitEntry ->
                 val path = gitEntry.newPath
                 val module = dependencyAnalyzer.getModuleForFile(path)
@@ -100,14 +100,14 @@ abstract class CalculateImpactTask : DefaultTask() {
 
             logger.lifecycle("Found ${changedFiles.size} changed files")
 
-            // Определяем затронутые модули
+            // Determine affected modules
             val directModules = changedFiles.mapNotNull { it.module }.toSet()
             val affectedModules = dependencyGraph.getAffectedModules(directModules)
 
             logger.lifecycle("Directly changed modules: $directModules")
             logger.lifecycle("All affected modules: $affectedModules")
 
-            // Рассчитываем scope тестов
+            // Calculate test scope
             val testsToRun = testScopeCalculator.calculateTestScope(changedFiles)
 
             testsToRun.forEach { (type, tasks) ->
@@ -117,7 +117,7 @@ abstract class CalculateImpactTask : DefaultTask() {
                 }
             }
 
-            // Определяем файлы для линтинга
+            // Determine files to lint
             val lintExtensions = extension.lintFileExtensions.get()
             val filesToLint = changedFiles
                 .filter { file ->
@@ -128,7 +128,7 @@ abstract class CalculateImpactTask : DefaultTask() {
 
             logger.lifecycle("Files to lint: ${filesToLint.size}")
 
-            // Создаем результат
+            // Create result
             val result = ImpactAnalysisResult(
                 changedFiles = changedFiles,
                 affectedModules = affectedModules,
@@ -136,7 +136,7 @@ abstract class CalculateImpactTask : DefaultTask() {
                 filesToLint = filesToLint
             )
 
-            // Сохраняем результат в JSON
+            // Save result to JSON
             saveResult(result)
 
             logger.lifecycle("Impact analysis result saved to: ${outputFile.get().asFile}")

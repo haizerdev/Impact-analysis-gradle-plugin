@@ -1,17 +1,17 @@
 package com.nzr.impactanalysis.model
 
 /**
- * Типы тестов, которые могут быть запущены
+ * Test types that can be run
  */
 enum class TestType(val taskSuffix: String) {
-    UNIT("test"),                    // Unit тесты
-    INTEGRATION("integrationTest"),  // Интеграционные тесты
-    UI("uiTest"),                    // UI тесты
-    E2E("e2eTest"),                  // End-to-end тесты
-    API("apiTest"),                  // API тесты
-    PERFORMANCE("performanceTest"),  // Тесты производительности
-    CONTRACT("contractTest"),        // Contract тесты
-    ALL("allTests");                 // Все тесты
+    UNIT("test"),                    // Unit tests
+    INTEGRATION("integrationTest"),  // Integration tests
+    UI("uiTest"),                    // UI tests
+    E2E("e2eTest"),                  // End-to-end tests
+    API("apiTest"),                  // API tests
+    PERFORMANCE("performanceTest"),  // Performance tests
+    CONTRACT("contractTest"),        // Contract tests
+    ALL("allTests");                 // All tests
 
     companion object {
         fun fromString(type: String): TestType? {

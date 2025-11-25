@@ -12,7 +12,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * Unit тесты для GitClient
+ * Unit tests for GitClient
  */
 class GitClientTest {
 
@@ -22,11 +22,11 @@ class GitClientTest {
 
     @Before
     fun setup() {
-        // Создаем временный Git репозиторий
+        // Create temporary Git repository
         tempDir = createTempDir("git-test")
         git = Git.init().setDirectory(tempDir).call()
 
-        // Создаем начальный коммит
+        // Create initial commit
         File(tempDir, "README.md").writeText("# Test Project")
         git.add().addFilepattern(".").call()
         git.commit().setMessage("Initial commit").call()
@@ -43,15 +43,15 @@ class GitClientTest {
 
     @Test
     fun `test getChangedFiles with added file`() {
-        // Добавляем новый файл
+        // Add new file
         File(tempDir, "NewFile.kt").writeText("class NewFile")
         git.add().addFilepattern(".").call()
         git.commit().setMessage("Add new file").call()
 
-        // Получаем изменения
+        // Get changes
         val changes = gitClient.getChangedFiles("HEAD~1", "HEAD")
 
-        // Проверяем
+        // Verify
         assertEquals(1, changes.size)
         assertEquals("NewFile.kt", changes[0].newPath)
         assertEquals(ChangeType.ADDED, changes[0].changeType)
@@ -59,15 +59,15 @@ class GitClientTest {
 
     @Test
     fun `test getChangedFiles with modified file`() {
-        // Изменяем существующий файл
+        // Modify existing file
         File(tempDir, "README.md").writeText("# Updated Project")
         git.add().addFilepattern(".").call()
         git.commit().setMessage("Update README").call()
 
-        // Получаем изменения
+        // Get changes
         val changes = gitClient.getChangedFiles("HEAD~1", "HEAD")
 
-        // Проверяем
+        // Verify
         assertEquals(1, changes.size)
         assertEquals("README.md", changes[0].newPath)
         assertEquals(ChangeType.MODIFIED, changes[0].changeType)
@@ -75,46 +75,46 @@ class GitClientTest {
 
     @Test
     fun `test getChangedFiles with deleted file`() {
-        // Удаляем файл
+        // Delete file
         File(tempDir, "README.md").delete()
         git.rm().addFilepattern("README.md").call()
         git.commit().setMessage("Delete README").call()
 
-        // Получаем изменения
+        // Get changes
         val changes = gitClient.getChangedFiles("HEAD~1", "HEAD")
 
-        // Проверяем
+        // Verify
         assertEquals(1, changes.size)
         assertEquals(ChangeType.DELETED, changes[0].changeType)
     }
 
     @Test
     fun `test getChangedFiles with multiple files`() {
-        // Добавляем несколько файлов
+        // Add multiple files
         File(tempDir, "File1.kt").writeText("class File1")
         File(tempDir, "File2.kt").writeText("class File2")
         File(tempDir, "File3.kt").writeText("class File3")
         git.add().addFilepattern(".").call()
         git.commit().setMessage("Add multiple files").call()
 
-        // Получаем изменения
+        // Get changes
         val changes = gitClient.getChangedFiles("HEAD~1", "HEAD")
 
-        // Проверяем
+        // Verify
         assertEquals(3, changes.size)
         assertTrue(changes.all { it.changeType == ChangeType.ADDED })
     }
 
     @Test
     fun `test getUncommittedChanges`() {
-        // Создаем файл без коммита
+        // Create file without commit
         File(tempDir, "Uncommitted.kt").writeText("class Uncommitted")
         git.add().addFilepattern(".").call()
 
-        // Получаем uncommitted изменения
+        // Get uncommitted changes
         val changes = gitClient.getUncommittedChanges()
 
-        // Проверяем
+        // Verify
         assertTrue(changes.isNotEmpty())
         assertTrue(changes.any { it.newPath == "Uncommitted.kt" })
     }
@@ -123,25 +123,25 @@ class GitClientTest {
     fun `test getCurrentBranch`() {
         val branch = gitClient.getCurrentBranch()
 
-        // По умолчанию должна быть master или main
+        // Should be master or main by default
         assertNotNull(branch)
         assertTrue(branch == "master" || branch == "main")
     }
 
     @Test
     fun `test getChangedFilesSinceBranch`() {
-        // Создаем новую ветку
+        // Create new branch
         git.checkout().setCreateBranch(true).setName("feature").call()
 
-        // Добавляем файл в feature ветке
+        // Add file in feature branch
         File(tempDir, "Feature.kt").writeText("class Feature")
         git.add().addFilepattern(".").call()
         git.commit().setMessage("Add feature").call()
 
-        // Получаем изменения от master
+        // Get changes from master
         val changes = gitClient.getChangedFilesSinceBranch("master")
 
-        // Проверяем
+        // Verify
         assertEquals(1, changes.size)
         assertEquals("Feature.kt", changes[0].newPath)
     }

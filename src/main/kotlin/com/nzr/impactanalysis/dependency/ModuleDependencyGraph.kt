@@ -4,7 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
 
 /**
- * Граф зависимостей между модулями проекта
+ * Dependency graph between project modules
  */
 class ModuleDependencyGraph(private val rootProject: Project) {
 
@@ -16,14 +16,14 @@ class ModuleDependencyGraph(private val rootProject: Project) {
     }
 
     /**
-     * Построить граф зависимостей
+     * Build dependency graph
      */
     private fun buildGraph() {
         rootProject.allprojects.forEach { project ->
             val modulePath = project.path
             dependencyMap.putIfAbsent(modulePath, mutableSetOf())
 
-            // Анализируем все конфигурации
+            // Analyze all configurations
             project.configurations.forEach { config ->
                 try {
                     config.dependencies
@@ -31,24 +31,24 @@ class ModuleDependencyGraph(private val rootProject: Project) {
                         .forEach { dependency ->
                             val dependencyPath = dependency.dependencyProject.path
 
-                            // Прямая зависимость: project -> dependency
+                            // Direct dependency: project -> dependency
                             dependencyMap.getOrPut(modulePath) { mutableSetOf() }
                                 .add(dependencyPath)
 
-                            // Обратная зависимость: dependency <- project
+                            // Reverse dependency: dependency <- project
                             reverseDependencyMap.getOrPut(dependencyPath) { mutableSetOf() }
                                 .add(modulePath)
                         }
                 } catch (e: Exception) {
-                    // Некоторые конфигурации могут быть не resolvable
-                    // Игнорируем ошибки
+                    // Some configurations may not be resolvable
+                    // Ignore errors
                 }
             }
         }
     }
 
     /**
-     * Получить все модули, которые зависят от данного модуля (прямо или косвенно)
+     * Get all modules that depend on given module (directly or transitively)
      */
     fun getAffectedModules(changedModules: Set<String>): Set<String> {
         val affected = mutableSetOf<String>()
@@ -59,7 +59,7 @@ class ModuleDependencyGraph(private val rootProject: Project) {
             toProcess.remove(current)
 
             if (affected.add(current)) {
-                // Добавляем все модули, которые зависят от текущего
+                // Add all modules that depend on current one
                 reverseDependencyMap[current]?.forEach { dependent ->
                     if (dependent !in affected) {
                         toProcess.add(dependent)
@@ -72,28 +72,28 @@ class ModuleDependencyGraph(private val rootProject: Project) {
     }
 
     /**
-     * Получить прямые зависимости модуля
+     * Get direct dependencies of module
      */
     fun getDirectDependencies(modulePath: String): Set<String> {
         return dependencyMap[modulePath]?.toSet() ?: emptySet()
     }
 
     /**
-     * Получить модули, которые прямо зависят от данного модуля
+     * Get modules that directly depend on given module
      */
     fun getDirectDependents(modulePath: String): Set<String> {
         return reverseDependencyMap[modulePath]?.toSet() ?: emptySet()
     }
 
     /**
-     * Получить все модули в проекте
+     * Get all modules in project
      */
     fun getAllModules(): Set<String> {
         return dependencyMap.keys
     }
 
     /**
-     * Экспортировать граф в DOT формат для визуализации
+     * Export graph to DOT format for visualization
      */
     fun toDotFormat(): String {
         val sb = StringBuilder()

@@ -8,47 +8,47 @@ import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 /**
- * Extension для конфигурации плагина Impact Analysis
+ * Extension for configuring Impact Analysis plugin
  */
 abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactory) {
 
     /**
-     * Базовая ветка для сравнения (по умолчанию origin/main)
+     * Base branch for comparison (default: origin/main)
      */
     val baseBranch: Property<String> = objects.property(String::class.java).apply {
         convention("origin/main")
     }
 
     /**
-     * Сравниваемая ветка (по умолчанию HEAD)
+     * Branch to compare (default: HEAD)
      */
     val compareBranch: Property<String> = objects.property(String::class.java).apply {
         convention("HEAD")
     }
 
     /**
-     * Включить анализ uncommitted изменений
+     * Include uncommitted changes analysis
      */
     val includeUncommittedChanges: Property<Boolean> = objects.property(Boolean::class.java).apply {
         convention(true)
     }
 
     /**
-     * Запускать все тесты при изменении критических файлов
+     * Run all tests when critical files are changed
      */
     val runAllTestsOnCriticalChangesProperty: Property<Boolean> = objects.property(Boolean::class.java).apply {
         convention(true)
     }
 
     /**
-     * Запускать unit тесты по умолчанию если нет других правил
+     * Run unit tests by default if no other rules match
      */
     val runUnitTestsByDefaultProperty: Property<Boolean> = objects.property(Boolean::class.java).apply {
         convention(true)
     }
 
     /**
-     * Критические пути, при изменении которых запускаются все тесты
+     * Critical paths that trigger all tests when changed
      */
     val criticalPaths: ListProperty<String> = objects.listProperty(String::class.java).apply {
         convention(
@@ -63,19 +63,19 @@ abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactor
     }
 
     /**
-     * Расширения файлов для линтинга
+     * File extensions for linting
      */
     val lintFileExtensions: ListProperty<String> = objects.listProperty(String::class.java).apply {
         convention(listOf("kt", "java", "xml"))
     }
 
     /**
-     * Правила для определения типов тестов
+     * Rules for determining test types
      */
     internal val testTypeRules = mutableMapOf<TestType, TestTypeRule>()
 
     /**
-     * Настроить правила для типа тестов
+     * Configure rules for test type
      */
     fun testType(type: TestType, action: Action<TestTypeRule>) {
         val rule = testTypeRules.getOrPut(type) { TestTypeRule() }
@@ -83,7 +83,7 @@ abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactor
     }
 
     /**
-     * Вспомогательные методы для настройки типов тестов
+     * Helper methods for configuring test types
      */
     fun unitTests(action: Action<TestTypeRule>) = testType(TestType.UNIT, action)
     fun integrationTests(action: Action<TestTypeRule>) = testType(TestType.INTEGRATION, action)
@@ -92,63 +92,63 @@ abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactor
     fun apiTests(action: Action<TestTypeRule>) = testType(TestType.API, action)
 
     /**
-     * Получить значение runAllTestsOnCriticalChanges
+     * Get runAllTestsOnCriticalChanges value
      */
     internal val runAllTestsOnCriticalChanges: Boolean
         get() = runAllTestsOnCriticalChangesProperty.get()
 
     /**
-     * Получить значение runUnitTestsByDefault
+     * Get runUnitTestsByDefault value
      */
     internal val runUnitTestsByDefault: Boolean
         get() = runUnitTestsByDefaultProperty.get()
 }
 
 /**
- * Правило для определения когда запускать определенный тип тестов
+ * Rule for determining when to run specific test types
  */
 class TestTypeRule {
     /**
-     * Паттерны путей файлов, при изменении которых нужно запустить эти тесты
+     * File path patterns that trigger these tests when changed
      */
     val pathPatterns = mutableListOf<String>()
 
     /**
-     * Запускать тесты только в измененных модулях (false = во всех зависимых модулях)
+     * Run tests only in changed modules (false = in all dependent modules)
      */
     var runOnlyInChangedModules: Boolean = false
 
     /**
-     * Добавить паттерн пути
+     * Add path pattern
      */
     fun whenChanged(pattern: String) {
         pathPatterns.add(pattern)
     }
 
     /**
-     * Добавить несколько паттернов путей
+     * Add multiple path patterns
      */
     fun whenChanged(vararg patterns: String) {
         pathPatterns.addAll(patterns)
     }
 
     /**
-     * Проверить, соответствует ли файл правилу
+     * Check if file matches the rule
      */
     fun shouldRunForFile(filePath: String): Boolean {
         if (pathPatterns.isEmpty()) {
-            return true // Если нет паттернов, применяется ко всем файлам
+            return true // If no patterns, applies to all files
         }
 
-        // Нормализуем путь файла для сравнения (всегда используем /)
+        // Normalize file path for comparison (always use /)
         val normalizedFilePath = filePath.replace("\\", "/")
 
         return pathPatterns.any { pattern ->
-            // Нормализуем паттерн тоже
+            // Normalize pattern too
             val normalizedPattern = pattern.replace("\\", "/")
 
             when {
-                // Паттерн типа **/something/** - ищем /something/ в любом месте пути
+                // Pattern like **/something/** - look for /something/ anywhere in path
                 normalizedPattern.startsWith("**/") && normalizedPattern.endsWith("/**") -> {
                     val middle = normalizedPattern.removePrefix("**/").removeSuffix("/**")
                     normalizedFilePath.contains("/$middle/")
@@ -156,7 +156,7 @@ class TestTypeRule {
 
                 normalizedPattern.startsWith("**/") -> {
                     val suffix = normalizedPattern.removePrefix("**/")
-                    // **/*.kt - проверяем окончание всего пути
+                    // **/*.kt - check ending of entire path
                     if (suffix.contains("*")) {
                         val regexPattern = suffix
                             .replace(".", "\\.")
@@ -173,10 +173,10 @@ class TestTypeRule {
                 }
 
                 normalizedPattern.contains("*") -> {
-                    // Если паттерн содержит / - это паттерн для пути
-                    // Если нет / - это паттерн для имени файла
+                    // If pattern contains / - it's a path pattern
+                    // If no / - it's a filename pattern
                     if (normalizedPattern.contains("/")) {
-                        // Паттерн для пути - превращаем в regex
+                        // Path pattern - convert to regex
                         val regexPattern = normalizedPattern
                             .replace(".", "\\.")
                             .replace("**", "DOUBLE_STAR_PLACEHOLDER")
@@ -184,7 +184,7 @@ class TestTypeRule {
                             .replace("DOUBLE_STAR_PLACEHOLDER", ".*")
                         normalizedFilePath.matches(regexPattern.toRegex())
                     } else {
-                        // Паттерн для имени файла - проверяем только имя
+                        // Filename pattern - check only name
                         val fileName = normalizedFilePath.substringAfterLast("/")
                         val regexPattern = normalizedPattern
                             .replace(".", "\\.")

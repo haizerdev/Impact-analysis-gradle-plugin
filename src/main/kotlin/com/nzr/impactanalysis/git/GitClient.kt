@@ -12,7 +12,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser
 import java.io.File
 
 /**
- * Клиент для работы с Git репозиторием
+ * Client for working with Git repository
  */
 class GitClient(private val projectDir: File) {
 
@@ -25,7 +25,7 @@ class GitClient(private val projectDir: File) {
     private val git: Git = Git(repository)
 
     /**
-     * Получить список измененных файлов между двумя коммитами
+     * Get list of changed files between two commits
      */
     fun getChangedFiles(
         baseRef: String = "HEAD~1",
@@ -46,19 +46,19 @@ class GitClient(private val projectDir: File) {
     }
 
     /**
-     * Получить список измененных файлов в рабочей директории (uncommitted changes)
+     * Get list of changed files in working directory (uncommitted changes)
      */
     fun getUncommittedChanges(): List<GitDiffEntry> {
         val status = git.status().call()
 
         val changes = mutableListOf<GitDiffEntry>()
 
-        // Добавленные файлы
+        // Added files
         status.added.forEach { path ->
             changes.add(GitDiffEntry(path, path, ChangeType.ADDED))
         }
 
-        // Измененные файлы
+        // Modified files
         status.modified.forEach { path ->
             changes.add(GitDiffEntry(path, path, ChangeType.MODIFIED))
         }
@@ -66,7 +66,7 @@ class GitClient(private val projectDir: File) {
             changes.add(GitDiffEntry(path, path, ChangeType.MODIFIED))
         }
 
-        // Удаленные файлы
+        // Deleted files
         status.removed.forEach { path ->
             changes.add(GitDiffEntry(path, path, ChangeType.DELETED))
         }
@@ -78,21 +78,21 @@ class GitClient(private val projectDir: File) {
     }
 
     /**
-     * Получить изменения между веткой и текущим HEAD
+     * Get changes between branch and current HEAD
      */
     fun getChangedFilesSinceBranch(branchName: String): List<GitDiffEntry> {
         return getChangedFiles(baseRef = branchName, compareRef = "HEAD")
     }
 
     /**
-     * Получить текущую ветку
+     * Get current branch
      */
     fun getCurrentBranch(): String {
         return repository.branch ?: "unknown"
     }
 
     /**
-     * Получить SHA HEAD коммита
+     * Get HEAD commit SHA
      */
     fun getHeadCommitHash(): String {
         return try {
@@ -104,8 +104,8 @@ class GitClient(private val projectDir: File) {
     }
 
     /**
-     * Получить хеш uncommitted изменений для Gradle input
-     * Возвращает строку содержащую пути и timestamp всех измененных файлов
+     * Get hash of uncommitted changes for Gradle input
+     * Returns string containing paths and timestamps of all changed files
      */
     fun getUncommittedChangesHash(): String {
         val changes = getUncommittedChanges()
@@ -113,7 +113,7 @@ class GitClient(private val projectDir: File) {
             return "no-changes"
         }
 
-        // Создаем строку из путей и их timestamp для хеширования
+        // Create string from paths and their timestamps for hashing
         val changesString = changes
             .sortedBy { it.newPath }
             .joinToString("|") { entry ->
@@ -162,7 +162,7 @@ class GitClient(private val projectDir: File) {
 }
 
 /**
- * Представление изменения файла в Git
+ * Git file change representation
  */
 data class GitDiffEntry(
     val oldPath: String,

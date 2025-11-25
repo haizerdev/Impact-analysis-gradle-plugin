@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Unit тесты для TestScopeCalculator
+ * Unit tests for TestScopeCalculator
  */
 class TestScopeCalculatorTest {
 
@@ -30,7 +30,7 @@ class TestScopeCalculatorTest {
     fun setup() {
         rootProject = ProjectBuilder.builder().withName("root").build()
 
-        // Создаем модули
+        // Create modules
         val app = ProjectBuilder.builder()
             .withName("app")
             .withParent(rootProject)
@@ -41,20 +41,20 @@ class TestScopeCalculatorTest {
             .withParent(rootProject)
             .build()
 
-        // Применяем плагины
+        // Apply plugins
         app.pluginManager.apply("java")
         feature.pluginManager.apply("java")
 
-        // Настраиваем зависимости
+        // Configure dependencies
         app.dependencies.add("implementation", feature)
 
-        // Создаем extension
+        // Create extension
         extension = rootProject.extensions.create(
             "impactAnalysis",
             ImpactAnalysisExtension::class.java
         )
 
-        // Настраиваем правила
+        // Configure rules
         extension.unitTests { rule ->
             rule.whenChanged("src/main/**")
             rule.runOnlyInChangedModules = false
@@ -129,13 +129,13 @@ class TestScopeCalculatorTest {
 
         val scope = calculator.calculateTestScope(changedFiles)
 
-        // Должны быть все типы тестов
+        // Should have all test types
         assertTrue(scope.isNotEmpty())
     }
 
     @Test
     fun `test calculateTestScope returns empty when no rules match`() {
-        // Отключаем default unit tests
+        // Disable default unit tests
         extension.runUnitTestsByDefaultProperty.set(false)
 
         val changedFiles = listOf(
@@ -177,7 +177,7 @@ class TestScopeCalculatorTest {
 
         val priority = calculator.getPriorityModules(changedFiles)
 
-        // feature должен быть первым (больше изменений)
+        // feature should be first (more changes)
         assertEquals(":feature", priority[0])
     }
 
@@ -200,7 +200,7 @@ class TestScopeCalculatorTest {
 
         val priority = calculator.getPriorityModules(changedFiles)
 
-        // app должен быть первым (изменен конфиг файл)
+        // app should be first (config file changed)
         assertEquals(":app", priority[0])
     }
 }

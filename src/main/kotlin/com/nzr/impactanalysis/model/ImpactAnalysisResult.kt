@@ -3,7 +3,7 @@ package com.nzr.impactanalysis.model
 import java.io.Serializable
 
 /**
- * Результат анализа изменений
+ * Impact analysis result
  */
 data class ImpactAnalysisResult(
     val changedFiles: List<ChangedFile>,
@@ -14,7 +14,7 @@ data class ImpactAnalysisResult(
 ) : Serializable
 
 /**
- * Информация об измененном файле
+ * Changed file information
  */
 data class ChangedFile(
     val path: String,
@@ -24,7 +24,7 @@ data class ChangedFile(
 ) : Serializable
 
 /**
- * Тип изменения в Git
+ * Git change type
  */
 enum class ChangeType {
     ADDED,
@@ -35,7 +35,7 @@ enum class ChangeType {
 }
 
 /**
- * Язык программирования файла
+ * File programming language
  */
 enum class FileLanguage(val extensions: List<String>) {
     KOTLIN(listOf("kt", "kts")),

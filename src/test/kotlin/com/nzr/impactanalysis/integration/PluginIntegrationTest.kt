@@ -11,7 +11,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
- * Integration тесты для плагина
+ * Integration tests for plugin
  */
 class PluginIntegrationTest {
 
@@ -31,7 +31,7 @@ class PluginIntegrationTest {
     fun `test plugin can be applied`() {
         rootProject.pluginManager.apply(ImpactAnalysisPlugin::class.java)
 
-        // Проверяем что плагин применился
+        // Verify plugin was applied
         assertTrue(rootProject.plugins.hasPlugin(ImpactAnalysisPlugin::class.java))
     }
 
@@ -39,7 +39,7 @@ class PluginIntegrationTest {
     fun `test plugin registers extension`() {
         rootProject.pluginManager.apply(ImpactAnalysisPlugin::class.java)
 
-        // Проверяем что extension зарегистрирован
+        // Verify extension is registered
         val extension = rootProject.extensions.findByName("impactAnalysis")
         assertNotNull(extension)
     }
@@ -48,7 +48,7 @@ class PluginIntegrationTest {
     fun `test plugin registers tasks`() {
         rootProject.pluginManager.apply(ImpactAnalysisPlugin::class.java)
 
-        // Проверяем что все задачи зарегистрированы
+        // Verify all tasks are registered
         assertNotNull(rootProject.tasks.findByName("calculateImpact"))
         assertNotNull(rootProject.tasks.findByName("getChangedFiles"))
         assertNotNull(rootProject.tasks.findByName("getChangedFilesForLint"))
@@ -71,13 +71,13 @@ class PluginIntegrationTest {
     fun `test extension can be configured`() {
         rootProject.pluginManager.apply(ImpactAnalysisPlugin::class.java)
 
-        // Настраиваем extension
+        // Configure extension
         rootProject.extensions.configure<ImpactAnalysisExtension>("impactAnalysis") { extension ->
             extension.baseBranch.set("origin/develop")
             extension.includeUncommittedChanges.set(false)
         }
 
-        // Проверяем что конфигурация применилась
+        // Verify configuration was applied
         val extension = rootProject.extensions.getByName("impactAnalysis")
                 as ImpactAnalysisExtension
 

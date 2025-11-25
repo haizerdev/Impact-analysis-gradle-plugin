@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Unit тесты для ModuleDependencyGraph
+ * Unit tests for ModuleDependencyGraph
  */
 class ModuleDependencyGraphTest {
 
@@ -21,10 +21,10 @@ class ModuleDependencyGraphTest {
 
     @Before
     fun setup() {
-        // Создаем мок структуру проекта
+        // Create mock project structure
         rootProject = ProjectBuilder.builder().withName("root").build()
 
-        // Создаем модули
+        // Create modules
         app = ProjectBuilder.builder()
             .withName("app")
             .withParent(rootProject)
@@ -45,13 +45,13 @@ class ModuleDependencyGraphTest {
             .withParent(rootProject)
             .build()
 
-        // Применяем плагин java для создания конфигураций
+        // Apply java plugin to create configurations
         app.pluginManager.apply("java")
         featureAuth.pluginManager.apply("java")
         featureProfile.pluginManager.apply("java")
         coreNetwork.pluginManager.apply("java")
 
-        // Настраиваем зависимости
+        // Configure dependencies
         // app -> feature-auth
         app.dependencies.add("implementation", featureAuth)
 
@@ -100,7 +100,7 @@ class ModuleDependencyGraphTest {
     fun `test getAffectedModules finds all transitive dependents`() {
         val graph = ModuleDependencyGraph(rootProject)
 
-        // Если изменился core-network, должны быть затронуты все модули
+        // If core-network changed, all modules should be affected
         val affected = graph.getAffectedModules(setOf(":core-network"))
 
         assertTrue(affected.contains(":core-network"))
@@ -113,7 +113,7 @@ class ModuleDependencyGraphTest {
     fun `test getAffectedModules with leaf module`() {
         val graph = ModuleDependencyGraph(rootProject)
 
-        // Если изменился app (листовой модуль), только он затронут
+        // If app changed (leaf module), only it is affected
         val affected = graph.getAffectedModules(setOf(":app"))
 
         assertEquals(1, affected.size)
@@ -124,13 +124,13 @@ class ModuleDependencyGraphTest {
     fun `test getAffectedModules with multiple changed modules`() {
         val graph = ModuleDependencyGraph(rootProject)
 
-        // Изменились feature-auth и feature-profile
+        // feature-auth and feature-profile changed
         val affected = graph.getAffectedModules(setOf(":feature-auth", ":feature-profile"))
 
         assertTrue(affected.contains(":feature-auth"))
         assertTrue(affected.contains(":feature-profile"))
         assertTrue(affected.contains(":app"))
-        // core-network не должен быть затронут (он dependency, а не dependent)
+        // core-network should not be affected (it's a dependency, not a dependent)
         assertTrue(!affected.contains(":core-network") || affected.size >= 3)
     }
 

@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Unit тесты для TestType enum
+ * Unit tests for TestType enum
  */
 class TestTypeTest {
 

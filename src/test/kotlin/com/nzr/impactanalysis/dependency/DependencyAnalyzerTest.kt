@@ -11,7 +11,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Unit тесты для DependencyAnalyzer
+ * Unit tests for DependencyAnalyzer
  */
 class DependencyAnalyzerTest {
 
@@ -22,7 +22,7 @@ class DependencyAnalyzerTest {
     fun setup() {
         rootProject = ProjectBuilder.builder().withName("root").build()
 
-        // Создаем тестовые модули
+        // Create test modules
         val app = ProjectBuilder.builder()
             .withName("app")
             .withParent(rootProject)
@@ -33,16 +33,16 @@ class DependencyAnalyzerTest {
             .withParent(rootProject)
             .build()
 
-        // Применяем плагины
+        // Apply plugins
         app.pluginManager.apply("java")
         feature.pluginManager.apply("java")
 
-        // Создаем структуру директорий
+        // Create directory structure
         File(app.projectDir, "src/main/kotlin").mkdirs()
         File(app.projectDir, "src/test/kotlin").mkdirs()
         File(feature.projectDir, "src/main/kotlin").mkdirs()
 
-        // Создаем build.gradle файлы
+        // Create build.gradle files
         File(app.projectDir, "build.gradle").writeText("// app build")
         File(feature.projectDir, "build.gradle").writeText("// feature build")
 

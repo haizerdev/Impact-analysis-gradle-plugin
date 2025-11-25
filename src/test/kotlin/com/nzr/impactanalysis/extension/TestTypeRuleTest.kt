@@ -6,7 +6,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Unit тесты для TestTypeRule
+ * Unit tests for TestTypeRule
  */
 class TestTypeRuleTest {
 
@@ -75,7 +75,7 @@ class TestTypeRuleTest {
     fun `test shouldRunForFile returns true when no patterns specified`() {
         val rule = TestTypeRule()
 
-        // Без паттернов - применяется ко всем файлам
+        // No patterns - applies to all files
         assertTrue(rule.shouldRunForFile("any/file/path.kt"))
         assertTrue(rule.shouldRunForFile("another/path/file.java"))
     }
@@ -104,10 +104,10 @@ class TestTypeRuleTest {
     fun `test runOnlyInChangedModules flag`() {
         val rule = TestTypeRule()
 
-        // По умолчанию false
+        // Default is false
         assertFalse(rule.runOnlyInChangedModules)
 
-        // Можно изменить
+        // Can be changed
         rule.runOnlyInChangedModules = true
         assertTrue(rule.runOnlyInChangedModules)
     }

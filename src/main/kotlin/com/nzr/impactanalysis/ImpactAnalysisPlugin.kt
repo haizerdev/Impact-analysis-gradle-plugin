@@ -8,30 +8,30 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
- * Плагин для анализа изменений и определения scope тестов
+ * Plugin for change analysis and test scope determination
  */
 class ImpactAnalysisPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        // Применяем плагин только к root проекту
+        // Apply plugin only to root project
         if (project != project.rootProject) {
             return
         }
 
-        // Регистрируем extension
+        // Register extension
         val extension = project.extensions.create(
             "impactAnalysis",
             ImpactAnalysisExtension::class.java
         )
 
-        // Регистрируем задачи
+        // Register tasks
         registerTasks(project, extension)
 
         project.logger.lifecycle("Impact Analysis Plugin applied to project: ${project.name}")
     }
 
     private fun registerTasks(project: Project, extension: ImpactAnalysisExtension) {
-        // Задача расчета impact analysis
+        // Task for calculating impact analysis
         project.tasks.register("calculateImpact", CalculateImpactTask::class.java) { task ->
             task.description = "Calculate impact analysis based on Git changes"
             task.group = "impact analysis"
@@ -41,7 +41,7 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             task.includeUncommittedChanges.convention(extension.includeUncommittedChanges)
         }
 
-        // Задача получения измененных файлов
+        // Task for getting changed files
         project.tasks.register("getChangedFiles", GetChangedFilesTask::class.java) { task ->
             task.description = "Get list of changed files from Git"
             task.group = "impact analysis"
@@ -51,7 +51,7 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             task.includeUncommittedChanges.convention(extension.includeUncommittedChanges)
         }
 
-        // Задача для получения измененных файлов для линтинга
+        // Task for getting changed files for linting
         project.tasks.register("getChangedFilesForLint", GetChangedFilesTask::class.java) { task ->
             task.description = "Get list of changed files for linting"
             task.group = "impact analysis"
@@ -65,16 +65,16 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             )
         }
 
-        // Задача запуска тестов на основе impact analysis
+        // Task for running tests based on impact analysis
         project.tasks.register("runImpactTests", RunImpactTestsTask::class.java) { task ->
             task.description = "Run tests based on impact analysis results"
             task.group = "impact analysis"
 
-            // Зависит от calculateImpact
+            // Depends on calculateImpact
             task.dependsOn("calculateImpact")
         }
 
-        // Задача для полного flow: analyze + test
+        // Task for complete flow: analyze + test
         project.tasks.register("impactTest") { task ->
             task.description = "Calculate impact and run affected tests"
             task.group = "impact analysis"

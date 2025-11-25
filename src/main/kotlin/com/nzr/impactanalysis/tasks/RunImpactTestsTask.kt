@@ -8,7 +8,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 
 /**
- * Задача для запуска тестов на основе результатов impact analysis
+ * Task for running tests based on impact analysis results
  */
 abstract class RunImpactTestsTask : DefaultTask() {
 
@@ -43,7 +43,7 @@ abstract class RunImpactTestsTask : DefaultTask() {
             throw IllegalStateException("Impact analysis result not found")
         }
 
-        // Читаем результат
+        // Read result
         val gson = Gson()
         val result = gson.fromJson(resultFile.readText(), ImpactAnalysisResult::class.java)
 
@@ -52,7 +52,7 @@ abstract class RunImpactTestsTask : DefaultTask() {
             return
         }
 
-        // Фильтруем по типам тестов если указаны
+        // Filter by test types if specified
         val requestedTypes = testTypes.orNull?.split(",")?.map { it.trim() }
         val testsToRun = if (requestedTypes != null) {
             result.testsToRun.filterKeys { type ->
@@ -79,16 +79,16 @@ abstract class RunImpactTestsTask : DefaultTask() {
                 logger.lifecycle("Running: $taskPath")
 
                 try {
-                    // Запускаем задачу через Gradle
+                    // Run task through Gradle
                     val taskResult = project.gradle.includedBuilds.firstOrNull()?.task(taskPath)
                         ?: project.rootProject.tasks.findByPath(taskPath)
 
                     if (taskResult != null) {
-                        // Задача найдена в текущем проекте
+                        // Task found in current project
                         successfulTasks++
                         logger.lifecycle("✓ $taskPath completed successfully")
                     } else {
-                        // Пробуем запустить через exec
+                        // Try running through exec
                         val execResult = project.exec { spec ->
                             spec.workingDir = project.rootProject.projectDir
                             if (System.getProperty("os.name").lowercase().contains("win")) {
@@ -122,7 +122,7 @@ abstract class RunImpactTestsTask : DefaultTask() {
             }
         }
 
-        // Итоговый отчет
+        // Final report
         logger.lifecycle("\n" + "=".repeat(60))
         logger.lifecycle("Impact Tests Summary")
         logger.lifecycle("=".repeat(60))
