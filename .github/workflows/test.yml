@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -61,6 +66,7 @@ jobs:
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
         if: github.event_name == 'pull_request'
+        continue-on-error: true
         with:
           paths: build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
