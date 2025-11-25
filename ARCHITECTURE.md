@@ -1,30 +1,30 @@
-# Архитектура Impact Analysis Plugin
+# Impact Analysis Plugin Architecture
 
-## 📋 Общий план реализации
+## 📋 Implementation Overview
 
-### Цели проекта
+### Project Goals
 
-1. Создать универсальный Gradle плагин для анализа изменений в Git
-2. Автоматически определять scope различных типов тестов
-3. Предоставлять список измененных файлов для линтеров/детекта
-4. Работать независимо от конфигурации проекта
-5. Поддерживать multi-module проекты любой сложности
+1. Create a universal Gradle plugin for Git changes analysis
+2. Automatically determine scope of different test types
+3. Provide list of changed files for linters/detekt
+4. Work independently of project configuration
+5. Support multi-module projects of any complexity
 
-## 🏗️ Архитектурные компоненты
+## 🏗️ Architectural Components
 
-### 1. Git Layer (Слой работы с Git)
+### 1. Git Layer
 
-**Компоненты:**
+**Components:**
 
-- `GitClient` - основной клиент для работы с Git через JGit
-- `GitDiffEntry` - модель изменения файла
+- `GitClient` - main client for Git operations via JGit
+- `GitDiffEntry` - file change model
 
-**Ответственность:**
+**Responsibilities:**
 
-- Получение списка измененных файлов между коммитами
-- Работа с uncommitted изменениями
-- Сравнение веток
-- Определение типа изменения (ADD, MODIFY, DELETE, etc.)
+- Get list of changed files between commits
+- Work with uncommitted changes
+- Compare branches
+- Determine change type (ADD, MODIFY, DELETE, etc.)
 
 **API:**
 
@@ -37,26 +37,26 @@ class GitClient(projectDir: File) {
 }
 ```
 
-### 2. Dependency Analysis Layer (Слой анализа зависимостей)
+### 2. Dependency Analysis Layer
 
-**Компоненты:**
+**Components:**
 
-- `ModuleDependencyGraph` - граф зависимостей модулей
-- `DependencyAnalyzer` - анализатор для определения модулей
+- `ModuleDependencyGraph` - module dependency graph
+- `DependencyAnalyzer` - analyzer for module determination
 
-**Ответственность:**
+**Responsibilities:**
 
-- Построение графа зависимостей между модулями
-- Определение к какому модулю относится файл
-- Вычисление всех затронутых модулей (включая транзитивные зависимости)
-- Кэширование результатов
+- Build dependency graph between modules
+- Determine which module a file belongs to
+- Calculate all affected modules (including transitive dependencies)
+- Cache results
 
-**Алгоритм построения графа:**
+**Graph Building Algorithm:**
 
-1. Обойти все проекты в `rootProject.allprojects`
-2. Для каждого проекта проанализировать все конфигурации
-3. Извлечь `ProjectDependency` (зависимости между модулями)
-4. Построить двунаправленный граф:
+1. Traverse all projects in `rootProject.allprojects`
+2. For each project, analyze all configurations
+3. Extract `ProjectDependency` (dependencies between modules)
+4. Build bidirectional graph:
     - Direct dependencies: module → dependency
     - Reverse dependencies: dependency → dependents
 
@@ -67,7 +67,7 @@ class ModuleDependencyGraph(rootProject: Project) {
     fun getAffectedModules(changedModules: Set<String>): Set<String>
     fun getDirectDependencies(modulePath: String): Set<String>
     fun getDirectDependents(modulePath: String): Set<String>
-    fun toDotFormat(): String // Для визуализации
+    fun toDotFormat(): String // For visualization
 }
 
 class DependencyAnalyzer(rootProject: Project) {
@@ -77,29 +77,29 @@ class DependencyAnalyzer(rootProject: Project) {
 }
 ```
 
-### 3. Test Scope Calculation Layer (Слой расчета scope тестов)
+### 3. Test Scope Calculation Layer
 
-**Компоненты:**
+**Components:**
 
-- `TestScopeCalculator` - калькулятор scope тестов
-- `TestType` - enum типов тестов
-- `TestTypeRule` - правила для типов тестов
+- `TestScopeCalculator` - test scope calculator
+- `TestType` - enum of test types
+- `TestTypeRule` - rules for test types
 
-**Ответственность:**
+**Responsibilities:**
 
-- Определение какие тесты нужно запускать
-- Применение пользовательских правил
-- Обработка критических изменений
-- Генерация списка задач для запуска
+- Determine which tests need to run
+- Apply user-defined rules
+- Handle critical changes
+- Generate list of tasks to run
 
-**Алгоритм:**
+**Algorithm:**
 
-1. Получить список измененных файлов
-2. Определить прямо затронутые модули
-3. Вычислить все зависимые модули через граф
-4. Проверить наличие критических изменений
-5. Применить правила для каждого типа тестов
-6. Сгенерировать список Gradle задач
+1. Get list of changed files
+2. Determine directly affected modules
+3. Calculate all dependent modules via graph
+4. Check for critical changes
+5. Apply rules for each test type
+6. Generate list of Gradle tasks
 
 **API:**
 
@@ -115,20 +115,20 @@ class TestScopeCalculator(
 }
 ```
 
-### 4. Configuration Layer (Слой конфигурации)
+### 4. Configuration Layer
 
-**Компоненты:**
+**Components:**
 
-- `ImpactAnalysisExtension` - DSL для конфигурации
-- `TestTypeRule` - правила для типов тестов
+- `ImpactAnalysisExtension` - DSL for configuration
+- `TestTypeRule` - rules for test types
 
-**Ответственность:**
+**Responsibilities:**
 
-- Предоставление DSL для настройки плагина
-- Валидация конфигурации
-- Значения по умолчанию
+- Provide DSL for plugin configuration
+- Configuration validation
+- Default values
 
-**DSL пример:**
+**DSL Example:**
 
 ```kotlin
 impactAnalysis {
@@ -141,65 +141,65 @@ impactAnalysis {
 }
 ```
 
-### 5. Tasks Layer (Слой задач)
+### 5. Tasks Layer
 
-**Компоненты:**
+**Components:**
 
-- `CalculateImpactTask` - расчет impact analysis
-- `GetChangedFilesTask` - получение списка файлов
-- `RunImpactTestsTask` - запуск тестов
+- `CalculateImpactTask` - calculate impact analysis
+- `GetChangedFilesTask` - get list of files
+- `RunImpactTestsTask` - run tests
 
-**Ответственность:**
+**Responsibilities:**
 
-- Выполнение операций
-- Сохранение результатов
-- Логирование
-- Интеграция с Gradle
+- Execute operations
+- Save results
+- Logging
+- Gradle integration
 
-## 🔄 Workflow (Последовательность работы)
+## 🔄 Workflow
 
-### Полный цикл анализа:
+### Complete Analysis Cycle:
 
 ```
-1. User запускает: ./gradlew calculateImpact
+1. User runs: ./gradlew calculateImpact
                    ↓
 2. CalculateImpactTask
-   - Инициализирует GitClient
-   - Получает список измененных файлов
+   - Initializes GitClient
+   - Gets list of changed files
                    ↓
 3. DependencyAnalyzer
-   - Определяет модуль для каждого файла
-   - Создает ChangedFile объекты
+   - Determines module for each file
+   - Creates ChangedFile objects
                    ↓
 4. ModuleDependencyGraph
-   - Строит граф зависимостей
-   - Вычисляет все затронутые модули
+   - Builds dependency graph
+   - Calculates all affected modules
                    ↓
 5. TestScopeCalculator
-   - Применяет правила из конфигурации
-   - Определяет типы тестов для запуска
-   - Генерирует список Gradle задач
+   - Applies rules from configuration
+   - Determines test types to run
+   - Generates list of Gradle tasks
                    ↓
-6. Сохранение результата
-   - JSON файл с полным отчетом
-   - Списки файлов для линтинга
+6. Save Results
+   - JSON file with complete report
+   - File lists for linting
                    ↓
-7. [Опционально] RunImpactTestsTask
-   - Читает результат
-   - Запускает необходимые тесты
+7. [Optional] RunImpactTestsTask
+   - Reads results
+   - Runs necessary tests
 ```
 
-## 📊 Структура данных
+## 📊 Data Structures
 
 ### ImpactAnalysisResult
 
 ```kotlin
 data class ImpactAnalysisResult(
-    val changedFiles: List<ChangedFile>,      // Все измененные файлы
-    val affectedModules: Set<String>,          // Все затронутые модули
-    val testsToRun: Map<TestType, List<String>>, // Тесты для запуска
-    val filesToLint: List<String>,             // Файлы для линтинга
-    val timestamp: Long                        // Время анализа
+    val changedFiles: List<ChangedFile>,        // All changed files
+    val affectedModules: Set<String>,            // All affected modules
+    val testsToRun: Map<TestType, List<String>>, // Tests to run
+    val filesToLint: List<String>,               // Files for linting
+    val timestamp: Long                          // Analysis time
 )
 ```
 
@@ -207,64 +207,64 @@ data class ImpactAnalysisResult(
 
 ```kotlin
 data class ChangedFile(
-    val path: String,           // Путь к файлу
-    val module: String?,        // Модуль (может быть null для корня)
-    val changeType: ChangeType, // Тип изменения
-    val language: FileLanguage? // Язык программирования
+    val path: String,           // File path
+    val module: String?,        // Module (can be null for root)
+    val changeType: ChangeType, // Change type
+    val language: FileLanguage? // Programming language
 )
 ```
 
-## 🎯 Ключевые особенности реализации
+## 🎯 Key Implementation Features
 
-### 1. Независимость от конфигурации проекта
+### 1. Project Configuration Independence
 
-**Проблема:** Разные проекты имеют разную структуру модулей и конфигурацию.
+**Problem:** Different projects have different module structures and configurations.
 
-**Решение:**
+**Solution:**
 
-- Динамический анализ структуры через Gradle API
-- Не полагаемся на hardcoded пути
-- Используем `rootProject.allprojects` для обнаружения модулей
-- Автоматическое определение модуля по пути файла
+- Dynamic structure analysis via Gradle API
+- Don't rely on hardcoded paths
+- Use `rootProject.allprojects` for module discovery
+- Automatic module determination by file path
 
-### 2. Поддержка multi-module проектов
+### 2. Multi-Module Project Support
 
-**Реализация:**
+**Implementation:**
 
-- Граф зависимостей строится для всех модулей
-- Поддержка вложенных модулей (`:app:feature:auth`)
-- Транзитивный анализ зависимостей
-- Оптимизация через кэширование
+- Dependency graph built for all modules
+- Support for nested modules (`:app:feature:auth`)
+- Transitive dependency analysis
+- Optimization through caching
 
-### 3. Гибкая конфигурация
+### 3. Flexible Configuration
 
-**Возможности:**
+**Capabilities:**
 
-- DSL для настройки через extension
-- Правила на основе паттернов путей
-- Поддержка пользовательских типов тестов
-- Переопределение через command-line параметры
+- DSL for configuration via extension
+- Path pattern-based rules
+- Support for custom test types
+- Command-line parameter overrides
 
-### 4. Performance оптимизации
+### 4. Performance Optimizations
 
-**Стратегии:**
+**Strategies:**
 
-- Lazy инициализация графа зависимостей
-- Кэширование результатов определения модулей
-- Использование JGit вместо exec команд
-- Минимизация количества Gradle evaluations
+- Lazy initialization of dependency graph
+- Cache module determination results
+- Use JGit instead of exec commands
+- Minimize number of Gradle evaluations
 
-## 🔧 Расширяемость
+## 🔧 Extensibility
 
-### Добавление новых типов тестов
+### Adding New Test Types
 
 ```kotlin
-// 1. Добавить в enum
+// 1. Add to enum
 enum class TestType(val taskSuffix: String) {
     SCREENSHOT("screenshotTest")
 }
 
-// 2. Настроить в конфигурации
+// 2. Configure
 impactAnalysis {
     testType(TestType.SCREENSHOT) {
         whenChanged("**/ui/**")
@@ -272,7 +272,7 @@ impactAnalysis {
 }
 ```
 
-### Добавление новых стратегий анализа
+### Adding New Analysis Strategies
 
 ```kotlin
 interface ImpactAnalysisStrategy {
@@ -280,7 +280,7 @@ interface ImpactAnalysisStrategy {
     fun getAffectedModules(changedFiles: List<ChangedFile>): Set<String>
 }
 
-// Custom стратегия
+// Custom strategy
 class DatabaseMigrationStrategy : ImpactAnalysisStrategy {
     override fun shouldRunTests(changedFiles: List<ChangedFile>): Boolean {
         return changedFiles.any { it.path.contains("/migration/") }
@@ -289,36 +289,36 @@ class DatabaseMigrationStrategy : ImpactAnalysisStrategy {
 }
 ```
 
-## 🧪 Тестирование
+## 🧪 Testing
 
-### Unit тесты
+### Unit Tests
 
-- Тестирование GitClient с mock репозиторием
-- Тестирование алгоритма построения графа
-- Тестирование правил определения scope
+- Test GitClient with mock repository
+- Test graph building algorithm
+- Test scope determination rules
 
-### Integration тесты
+### Integration Tests
 
-- Создание тестового multi-module проекта
-- Симуляция изменений в Git
-- Проверка правильности определения модулей
+- Create test multi-module project
+- Simulate Git changes
+- Verify correct module determination
 
-### E2E тесты
+### E2E Tests
 
-- Полный цикл от Git изменений до запуска тестов
-- Тестирование на реальных проектах
+- Complete cycle from Git changes to test execution
+- Testing on real projects
 
-## 📈 Метрики и мониторинг
+## 📈 Metrics and Monitoring
 
-### Что можно отслеживать:
+### What Can Be Tracked:
 
-- Количество измененных файлов
-- Количество затронутых модулей
-- Время выполнения анализа
-- Процент тестов, которые не пришлось запускать
-- Экономия времени CI/CD
+- Number of changed files
+- Number of affected modules
+- Analysis execution time
+- Percentage of tests that didn't need to run
+- CI/CD time savings
 
-### Экспорт метрик:
+### Metrics Export:
 
 ```kotlin
 data class ImpactMetrics(
@@ -332,21 +332,21 @@ data class ImpactMetrics(
 )
 ```
 
-## 🚀 Будущие улучшения
+## 🚀 Future Improvements
 
-### Возможные фичи:
+### Possible Features:
 
-1. **ML-based prediction** - предсказание проблемных изменений
-2. **Test impact history** - анализ истории влияния изменений
-3. **Smart parallelization** - оптимальная параллелизация тестов
-4. **Coverage-based analysis** - использование code coverage для точности
-5. **IDE integration** - плагины для IntelliJ IDEA
-6. **Web dashboard** - визуализация результатов
-7. **Slack/Teams notifications** - уведомления о результатах
+1. **ML-based prediction** - predict problematic changes
+2. **Test impact history** - analyze change impact history
+3. **Smart parallelization** - optimal test parallelization
+4. **Coverage-based analysis** - use code coverage for accuracy
+5. **IDE integration** - plugins for IntelliJ IDEA
+6. **Web dashboard** - results visualization
+7. **Slack/Teams notifications** - result notifications
 
-## 🎨 Best Practices для использования
+## 🎨 Best Practices for Usage
 
-### 1. CI/CD интеграция
+### 1. CI/CD Integration
 
 ```yaml
 # GitHub Actions
@@ -356,7 +356,7 @@ data class ImpactMetrics(
     ./gradlew runImpactTests
 ```
 
-### 2. Pre-commit hook
+### 2. Pre-commit Hook
 
 ```bash
 #!/bin/bash
@@ -364,37 +364,37 @@ data class ImpactMetrics(
 ./gradlew detekt --files=$(cat build/impact-analysis/lint-files.txt)
 ```
 
-### 3. Staged rollout
+### 3. Staged Rollout
 
 ```kotlin
-// Постепенное внедрение
+// Gradual adoption
 impactAnalysis {
-    // Сначала только логирование
+    // First, only logging
     runUnitTestsByDefault.set(false)
     
-    // Потом включить для feature веток
+    // Then enable for feature branches
     if (System.getenv("CI_BRANCH") != "main") {
         runUnitTestsByDefault.set(true)
     }
 }
 ```
 
-## 📊 Примеры результатов
+## 📊 Result Examples
 
-### Экономия времени на типичном проекте:
+### Time Savings on Typical Project:
 
-**До использования плагина:**
+**Before using the plugin:**
 
-- Все тесты: ~45 минут
-- Запускаются при каждом PR
+- All tests: ~45 minutes
+- Run on every PR
 
-**После использования плагина:**
+**After using the plugin:**
 
-- Small PR (1-2 файла): ~5 минут (89% экономии)
-- Medium PR (5-10 файлов): ~15 минут (67% экономии)
-- Large PR (20+ файлов): ~30 минут (33% экономии)
+- Small PR (1-2 files): ~5 minutes (89% savings)
+- Medium PR (5-10 files): ~15 minutes (67% savings)
+- Large PR (20+ files): ~30 minutes (33% savings)
 
-### Реальный пример:
+### Real Example:
 
 ```
 Changed files: 3
@@ -413,22 +413,19 @@ Tests to run: 5 tasks instead of 25 tasks
 Saved time: 32 minutes
 ```
 
-## 🔐 Безопасность
+## 🔐 Security
 
 ### Considerations:
 
-1. **Git credentials** - плагин не требует credentials (read-only)
-2. **File system access** - только внутри проекта
-3. **Network access** - не требуется (все локально)
-4. **Sensitive data** - результаты могут содержать пути файлов
+1. **Git credentials** - plugin doesn't require credentials (read-only)
+2. **File system access** - only within project
+3. **Network access** - not required (all local)
+4. **Sensitive data** - results may contain file paths
 
-### Рекомендации:
+### Recommendations:
 
-- Не коммитить `build/impact-analysis/` в Git
-- Добавить в `.gitignore`
-- В CI/CD сохранять результаты как artifacts
+- Don't commit `build/impact-analysis/` to Git
+- Add to `.gitignore`
+- In CI/CD save results as artifacts
 
 ---
-
-**Итог:** Плагин предоставляет мощный и гибкий инструмент для оптимизации процесса тестирования в любых Gradle проектах,
-значительно сокращая время CI/CD и повышая эффективность разработки.

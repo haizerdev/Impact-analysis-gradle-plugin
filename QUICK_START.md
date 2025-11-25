@@ -1,128 +1,128 @@
 # Quick Start Guide - Impact Analysis Plugin
 
-## 🚀 Быстрый старт за 5 минут
+## 🚀 Quick Start in 5 Minutes
 
-### Шаг 1: Установка
+### Step 1: Installation
 
-Добавьте плагин в корневой `build.gradle.kts`:
+Add the plugin to your root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.impactanalysis.plugin") version "1.0.0"
+    id("com.nzr.impact-analysis") version "1.0.1"
 }
 ```
 
-### Шаг 2: Минимальная конфигурация
+### Step 2: Minimal Configuration
 
 ```kotlin
 impactAnalysis {
-    baseBranch.set("origin/main")  // Ваша базовая ветка
+    baseBranch.set("origin/main")  // Your base branch
 }
 ```
 
-### Шаг 3: Первый запуск
+### Step 3: First Run
 
 ```bash
-# Анализируем изменения
+# Analyze changes
 ./gradlew calculateImpact
 
-# Смотрим результат
+# View result
 cat build/impact-analysis/result.json
 ```
 
-**Готово!** 🎉 Теперь плагин проанализирует изменения и покажет какие тесты нужно запустить.
+**Done!** 🎉 The plugin will now analyze changes and show which tests need to run.
 
 ---
 
-## 📋 Базовые команды
+## 📋 Basic Commands
 
-### 1. Анализ изменений
+### 1. Analyze Changes
 
 ```bash
 ./gradlew calculateImpact
 ```
 
-**Результат:** `build/impact-analysis/result.json` содержит:
+**Result:** `build/impact-analysis/result.json` contains:
 
-- Список измененных файлов
-- Затронутые модули
-- Тесты для запуска
-- Файлы для линтинга
+- List of changed files
+- Affected modules
+- Tests to run
+- Files for linting
 
-### 2. Получить список измененных файлов
+### 2. Get List of Changed Files
 
 ```bash
 ./gradlew getChangedFiles
 ```
 
-**Результат:** `build/impact-analysis/changed-files.txt`
+**Result:** `build/impact-analysis/changed-files.txt`
 
-### 3. Получить файлы для линтинга
+### 3. Get Files for Linting
 
 ```bash
 ./gradlew getChangedFilesForLint
 ```
 
-**Результат:** `build/impact-analysis/lint-files.txt`
+**Result:** `build/impact-analysis/lint-files.txt`
 
-### 4. Запустить только необходимые тесты
+### 4. Run Only Necessary Tests
 
 ```bash
 ./gradlew impactTest
 ```
 
-Это автоматически:
+This automatically:
 
-1. Проанализирует изменения
-2. Определит какие тесты запускать
-3. Запустит только необходимые тесты
+1. Analyzes changes
+2. Determines which tests to run
+3. Runs only necessary tests
 
 ---
 
-## ⚙️ Типичные конфигурации
+## ⚙️ Typical Configurations
 
-### Для Android проекта
+### For Android Project
 
 ```kotlin
 impactAnalysis {
     baseBranch.set("origin/develop")
     
-    // Unit тесты
+    // Unit tests
     unitTests {
         whenChanged("src/main/**")
         runOnlyInChangedModules = false
     }
     
-    // UI тесты
+    // UI tests
     uiTests {
         whenChanged("**/compose/**", "**/res/layout/**")
         runOnlyInChangedModules = false
     }
     
-    // Файлы для линтинга
+    // Linting files
     lintFileExtensions.set(listOf("kt", "java", "xml"))
 }
 ```
 
-### Для Backend (Spring Boot)
+### For Backend (Spring Boot)
 
 ```kotlin
 impactAnalysis {
     baseBranch.set("origin/main")
     
-    // Unit тесты
+    // Unit tests
     unitTests {
         whenChanged("src/main/**")
         runOnlyInChangedModules = false
     }
     
-    // Integration тесты
+    // Integration tests
     integrationTests {
         whenChanged("**/repository/**", "**/database/**")
         runOnlyInChangedModules = false
     }
     
-    // API тесты
+    // API tests
     apiTests {
         whenChanged("**/controller/**", "**/api/**")
         runOnlyInChangedModules = true
@@ -130,13 +130,13 @@ impactAnalysis {
 }
 ```
 
-### Для Microservices
+### For Microservices
 
 ```kotlin
 impactAnalysis {
     baseBranch.set("origin/main")
     
-    // Критические изменения в shared библиотеках
+    // Critical changes in shared libraries
     criticalPaths.set(listOf(
         "libs/common/**",
         "libs/api-contracts/**"
@@ -158,7 +158,7 @@ impactAnalysis {
 
 ---
 
-## 🔧 Интеграция с CI/CD
+## 🔧 CI/CD Integration
 
 ### GitHub Actions
 
@@ -176,7 +176,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Важно!
+          fetch-depth: 0  # Important!
       
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -209,9 +209,9 @@ stage('Impact Tests') {
 
 ---
 
-## 🎯 Интеграция с детектом/линтером
+## 🎯 Integration with Detekt/Linter
 
-### Вариант 1: Прямая интеграция
+### Option 1: Direct Integration
 
 ```kotlin
 tasks.register("detektChanged") {
@@ -228,13 +228,13 @@ tasks.register("detektChanged") {
 }
 ```
 
-### Вариант 2: В CI/CD
+### Option 2: In CI/CD
 
 ```bash
-# Получаем измененные файлы
+# Get changed files
 ./gradlew getChangedFilesForLint
 
-# Запускаем детект только на них
+# Run detekt only on them
 if [ -s build/impact-analysis/lint-files.txt ]; then
   ./gradlew detekt --input=$(cat build/impact-analysis/lint-files.txt | tr '\n' ',')
 fi
@@ -242,22 +242,22 @@ fi
 
 ---
 
-## 📊 Чтение результатов
+## 📊 Reading Results
 
-### Через командную строку
+### Via Command Line
 
 ```bash
-# Просмотр результата
+# View result
 cat build/impact-analysis/result.json | jq '.'
 
-# Только затронутые модули
+# Only affected modules
 cat build/impact-analysis/result.json | jq '.affectedModules'
 
-# Только тесты для запуска
+# Only tests to run
 cat build/impact-analysis/result.json | jq '.testsToRun'
 ```
 
-### Через Gradle задачу
+### Via Gradle Task
 
 ```kotlin
 tasks.register("showImpact") {
@@ -266,7 +266,7 @@ tasks.register("showImpact") {
     doLast {
         val result = com.google.gson.Gson().fromJson(
             file("build/impact-analysis/result.json").readText(),
-            com.impactanalysis.model.ImpactAnalysisResult::class.java
+            com.nzr.impact_analysis.model.ImpactAnalysisResult::class.java
         )
         
         println("Affected modules: ${result.affectedModules}")
@@ -277,15 +277,15 @@ tasks.register("showImpact") {
 
 ---
 
-## 💡 Полезные советы
+## 💡 Useful Tips
 
-### 1. Сравнение с конкретной веткой
+### 1. Compare with Specific Branch
 
 ```bash
 ./gradlew calculateImpact -PbaseBranch=origin/develop
 ```
 
-### 2. Игнорировать uncommitted изменения
+### 2. Ignore Uncommitted Changes
 
 ```kotlin
 impactAnalysis {
@@ -293,19 +293,19 @@ impactAnalysis {
 }
 ```
 
-### 3. Запустить только unit тесты
+### 3. Run Only Unit Tests
 
 ```bash
 ./gradlew runImpactTests -PtestTypes=unit
 ```
 
-### 4. Запустить несколько типов тестов
+### 4. Run Multiple Test Types
 
 ```bash
 ./gradlew runImpactTests -PtestTypes=unit,integration
 ```
 
-### 5. Продолжить при ошибках
+### 5. Continue on Failure
 
 ```bash
 ./gradlew runImpactTests -PcontinueOnFailure=true
@@ -315,89 +315,89 @@ impactAnalysis {
 
 ## 🐛 Troubleshooting
 
-### Проблема: "Git repository not found"
+### Problem: "Git repository not found"
 
-**Решение:** Убедитесь что вы в Git репозитории и есть `.git` папка
+**Solution:** Make sure you're in a Git repository and `.git` folder exists
 
-### Проблема: "No changes detected"
+### Problem: "No changes detected"
 
-**Решение:**
+**Solution:**
 
-- Проверьте что есть коммиты
-- Используйте `git status` для проверки изменений
-- Проверьте правильность `baseBranch`
+- Check that commits exist
+- Use `git status` to verify changes
+- Verify `baseBranch` is correct
 
-### Проблема: "Module not found for file"
+### Problem: "Module not found for file"
 
-**Решение:**
+**Solution:**
 
-- Файл может быть в корне проекта (не в модуле)
-- Проверьте что у модуля есть `build.gradle` файл
+- File might be in project root (not in a module)
+- Check that module has a `build.gradle` file
 
-### Проблема: Плагин не находит тесты
+### Problem: Plugin doesn't find tests
 
-**Решение:**
+**Solution:**
 
-- Убедитесь что задачи тестов существуют (`:test`, `:integrationTest` и т.д.)
-- Проверьте конфигурацию правил `whenChanged`
-
----
-
-## 📚 Дальнейшее чтение
-
-- [README.md](README.md) - Полная документация
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Архитектура плагина
-- [examples/](examples/) - Примеры конфигураций
+- Make sure test tasks exist (`:test`, `:integrationTest`, etc.)
+- Check `whenChanged` rule configuration
 
 ---
 
-## 🎓 Обучающие примеры
+## 📚 Further Reading
 
-### Пример 1: Базовое использование
+- [README.md](README.md) - Full documentation
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Plugin architecture
+- [examples/](examples/) - Configuration examples
+
+---
+
+## 🎓 Tutorial Examples
+
+### Example 1: Basic Usage
 
 ```bash
-# 1. Создайте коммит с изменениями
+# 1. Create commit with changes
 git add MyFile.kt
 git commit -m "Update MyFile"
 
-# 2. Запустите анализ
+# 2. Run analysis
 ./gradlew calculateImpact
 
-# 3. Посмотрите результат
+# 3. View result
 cat build/impact-analysis/result.json
 ```
 
-### Пример 2: Сравнение веток
+### Example 2: Branch Comparison
 
 ```bash
-# Сравнить вашу feature ветку с main
+# Compare your feature branch with main
 git checkout feature/my-feature
 ./gradlew calculateImpact -PbaseBranch=origin/main
 ```
 
-### Пример 3: CI/CD workflow
+### Example 3: CI/CD Workflow
 
 ```bash
-# 1. В PR, сравниваем с target веткой
+# 1. In PR, compare with target branch
 ./gradlew calculateImpact -PbaseBranch=origin/main
 
-# 2. Запускаем только нужные тесты
+# 2. Run only necessary tests
 ./gradlew runImpactTests
 
-# 3. Линтим только измененные файлы
+# 3. Lint only changed files
 ./gradlew getChangedFilesForLint
 ./gradlew detekt --input=@build/impact-analysis/lint-files.txt
 ```
 
 ---
 
-## ⚡ Быстрые шаблоны
+## ⚡ Quick Templates
 
-### Минимальная конфигурация
+### Minimal Configuration
 
 ```kotlin
 plugins {
-    id("com.impactanalysis.plugin") version "1.0.0"
+    id("com.nzr.impact-analysis") version "1.0.1"
 }
 
 impactAnalysis {
@@ -405,11 +405,11 @@ impactAnalysis {
 }
 ```
 
-### Полная конфигурация
+### Full Configuration
 
 ```kotlin
 plugins {
-    id("com.impactanalysis.plugin") version "1.0.0"
+    id("com.nzr.impact-analysis") version "1.0.1"
 }
 
 impactAnalysis {
@@ -435,7 +435,7 @@ impactAnalysis {
 
 ---
 
-**Готовы начать?** Попробуйте плагин прямо сейчас! 🚀
+**Ready to start?** Try the plugin right now! 🚀
 
 ```bash
 ./gradlew calculateImpact

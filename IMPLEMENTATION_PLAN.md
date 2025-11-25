@@ -1,70 +1,70 @@
-# План реализации и внедрения Impact Analysis Plugin
+# Implementation and Deployment Plan - Impact Analysis Plugin
 
-## 📋 Общий план
+## 📋 Overall Plan
 
-Этот документ описывает как реализован плагин и как можно его внедрить в реальный проект.
+This document describes how the plugin is implemented and how to deploy it in a real project.
 
 ---
 
-## ✅ Что уже реализовано
+## ✅ What's Already Implemented
 
-### 1. Структура плагина (100% готово)
+### 1. Plugin Structure (100% Complete)
 
 ```
 impact-analysis-plugin/
-├── src/main/kotlin/com/impactanalysis/
-│   ├── ImpactAnalysisPlugin.kt              ✅ Главный класс плагина
+├── src/main/kotlin/com/nzr/impact_analysis/
+│   ├── ImpactAnalysisPlugin.kt              ✅ Main plugin class
 │   ├── extension/
-│   │   └── ImpactAnalysisExtension.kt       ✅ DSL конфигурация
+│   │   └── ImpactAnalysisExtension.kt       ✅ DSL configuration
 │   ├── git/
-│   │   └── GitClient.kt                     ✅ Работа с Git через JGit
+│   │   └── GitClient.kt                     ✅ Git operations via JGit
 │   ├── dependency/
-│   │   ├── ModuleDependencyGraph.kt         ✅ Граф зависимостей
-│   │   └── DependencyAnalyzer.kt            ✅ Анализ зависимостей
+│   │   ├── ModuleDependencyGraph.kt         ✅ Dependency graph
+│   │   └── DependencyAnalyzer.kt            ✅ Dependency analysis
 │   ├── scope/
-│   │   └── TestScopeCalculator.kt           ✅ Расчет scope тестов
+│   │   └── TestScopeCalculator.kt           ✅ Test scope calculation
 │   ├── tasks/
-│   │   ├── CalculateImpactTask.kt           ✅ Задача анализа
-│   │   ├── GetChangedFilesTask.kt           ✅ Получение файлов
-│   │   └── RunImpactTestsTask.kt            ✅ Запуск тестов
+│   │   ├── CalculateImpactTask.kt           ✅ Analysis task
+│   │   ├── GetChangedFilesTask.kt           ✅ Get changed files
+│   │   └── RunImpactTestsTask.kt            ✅ Run tests
 │   └── model/
-│       ├── ImpactAnalysisResult.kt          ✅ Модели данных
-│       └── TestType.kt                      ✅ Типы тестов
-├── examples/                                 ✅ Примеры конфигураций
-├── build.gradle.kts                         ✅ Build конфигурация
-├── README.md                                ✅ Документация
-├── ARCHITECTURE.md                          ✅ Архитектура
-├── QUICK_START.md                           ✅ Быстрый старт
-└── SUMMARY.md                               ✅ Резюме
+│       ├── ImpactAnalysisResult.kt          ✅ Data models
+│       └── TestType.kt                      ✅ Test types
+├── examples/                                 ✅ Configuration examples
+├── build.gradle.kts                         ✅ Build configuration
+├── README.md                                ✅ Documentation
+├── ARCHITECTURE.md                          ✅ Architecture
+├── QUICK_START.md                           ✅ Quick start
+└── CHANGELOG.md                             ✅ Version history
 ```
 
-### 2. Ключевые компоненты
+### 2. Key Components
 
-✅ **GitClient** - полностью рабочий клиент для Git
+✅ **GitClient** - fully functional Git client
 
-- Получение изменений между коммитами
-- Поддержка uncommitted изменений
-- Сравнение веток
+- Get changes between commits
+- Support for uncommitted changes
+- Branch comparison
 
-✅ **ModuleDependencyGraph** - граф зависимостей
+✅ **ModuleDependencyGraph** - dependency graph
 
-- Построение графа через Gradle API
-- Транзитивный анализ зависимостей
-- Экспорт в DOT формат
+- Graph building via Gradle API
+- Transitive dependency analysis
+- Export to DOT format
 
-✅ **DependencyAnalyzer** - анализатор
+✅ **DependencyAnalyzer** - analyzer
 
-- Определение модуля для файла
-- Распознавание тестовых файлов
-- Распознавание конфигурационных файлов
+- Module determination for files
+- Test file recognition
+- Configuration file recognition
 
-✅ **TestScopeCalculator** - калькулятор scope
+✅ **TestScopeCalculator** - scope calculator
 
-- Применение правил из конфигурации
-- Обработка критических изменений
-- Генерация списка задач
+- Apply rules from configuration
+- Handle critical changes
+- Generate task lists
 
-✅ **Gradle Tasks** - 5 задач
+✅ **Gradle Tasks** - 5 tasks
 
 - calculateImpact
 - getChangedFiles
@@ -72,33 +72,33 @@ impact-analysis-plugin/
 - runImpactTests
 - impactTest
 
-### 3. Документация
+### 3. Documentation
 
-✅ **README.md** - полная документация с примерами
-✅ **ARCHITECTURE.md** - детальная архитектура
-✅ **QUICK_START.md** - быстрый старт
-✅ **SUMMARY.md** - резюме проекта
-✅ **Примеры** - для Android, Backend, Microservices
+✅ **README.md** - full documentation with examples
+✅ **ARCHITECTURE.md** - detailed architecture
+✅ **QUICK_START.md** - quick start guide
+✅ **CHANGELOG.md** - version history
+✅ **Examples** - for Android, Backend, Microservices
 
 ---
 
-## 🚀 Шаги для внедрения
+## 🚀 Deployment Steps
 
-### Этап 1: Локальная разработка и тестирование
+### Stage 1: Local Development and Testing
 
-#### 1.1 Сборка плагина
+#### 1.1 Build the Plugin
 
 ```bash
-# В директории плагина
+# In plugin directory
 ./gradlew build
 
-# Публикация в локальный Maven репозиторий
+# Publish to local Maven repository
 ./gradlew publishToMavenLocal
 ```
 
-#### 1.2 Тестирование на тестовом проекте
+#### 1.2 Test on a Test Project
 
-Создайте тестовый multi-module проект:
+Create a test multi-module project:
 
 ```
 test-project/
@@ -108,25 +108,25 @@ test-project/
 └── core-network/
 ```
 
-В `settings.gradle.kts`:
+In `settings.gradle.kts`:
 
 ```kotlin
 pluginManagement {
     repositories {
-        mavenLocal()  // Для локального тестирования
+        mavenLocal()  // For local testing
         gradlePluginPortal()
     }
 }
 
-// Для разработки можно использовать includeBuild
+// For development you can use includeBuild
 // includeBuild("../impact-analysis-plugin")
 ```
 
-В корневом `build.gradle.kts`:
+In root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.impactanalysis.plugin") version "1.0.0"
+    id("com.nzr.impact-analysis") version "1.0.1"
 }
 
 impactAnalysis {
@@ -139,37 +139,37 @@ impactAnalysis {
 }
 ```
 
-Запуск:
+Run:
 
 ```bash
 ./gradlew calculateImpact
 cat build/impact-analysis/result.json
 ```
 
-### Этап 2: Внедрение в реальный проект
+### Stage 2: Deploy to Real Project
 
-#### 2.1 Публикация плагина
+#### 2.1 Publish the Plugin
 
-**Вариант A: Gradle Plugin Portal (рекомендуется)**
+**Option A: Gradle Plugin Portal (recommended)**
 
-1. Создайте аккаунт на https://plugins.gradle.org
-2. Получите API ключи
-3. Добавьте в `gradle.properties`:
+1. Create account on https://plugins.gradle.org
+2. Get API keys
+3. Add to `gradle.properties`:
 
 ```properties
 gradle.publish.key=<your-key>
 gradle.publish.secret=<your-secret>
 ```
 
-4. Опубликуйте:
+4. Publish:
 
 ```bash
 ./gradlew publishPlugins
 ```
 
-**Вариант B: Корпоративный Maven репозиторий**
+**Option B: Corporate Maven Repository**
 
-В `build.gradle.kts` плагина:
+In plugin's `build.gradle.kts`:
 
 ```kotlin
 publishing {
@@ -186,13 +186,13 @@ publishing {
 }
 ```
 
-Публикация:
+Publish:
 
 ```bash
 ./gradlew publish
 ```
 
-**Вариант C: GitHub Packages**
+**Option C: GitHub Packages**
 
 ```kotlin
 publishing {
@@ -209,13 +209,13 @@ publishing {
 }
 ```
 
-#### 2.2 Подключение в проекте
+#### 2.2 Connect to Project
 
-В целевом проекте, в корневом `build.gradle.kts`:
+In target project's root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.impactanalysis.plugin") version "1.0.0"
+    id("com.nzr.impact-analysis") version "1.0.1"
 }
 
 impactAnalysis {
@@ -223,7 +223,7 @@ impactAnalysis {
     includeUncommittedChanges.set(true)
     runAllTestsOnCriticalChanges.set(true)
     
-    // Настройка под ваш проект
+    // Configure for your project
     unitTests {
         whenChanged("src/main/**", "src/test/**")
         runOnlyInChangedModules = false
@@ -236,36 +236,36 @@ impactAnalysis {
 }
 ```
 
-#### 2.3 Первый запуск и валидация
+#### 2.3 First Run and Validation
 
 ```bash
-# 1. Проверка что плагин работает
+# 1. Check that plugin works
 ./gradlew tasks --group "impact analysis"
 
-# Должны появиться задачи:
+# Should see tasks:
 # - calculateImpact
 # - getChangedFiles
 # - getChangedFilesForLint
 # - runImpactTests
 # - impactTest
 
-# 2. Создайте тестовое изменение
+# 2. Create test change
 echo "// test" >> some-module/src/main/SomeFile.kt
 git add .
 git commit -m "test: impact analysis"
 
-# 3. Запустите анализ
+# 3. Run analysis
 ./gradlew calculateImpact
 
-# 4. Проверьте результат
+# 4. Check result
 cat build/impact-analysis/result.json
 ```
 
-### Этап 3: Интеграция с CI/CD
+### Stage 3: CI/CD Integration
 
 #### 3.1 GitHub Actions
 
-Создайте `.github/workflows/impact-tests.yml`:
+Create `.github/workflows/impact-tests.yml`:
 
 ```yaml
 name: Impact Tests
@@ -282,7 +282,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Важно для Git анализа!
+          fetch-depth: 0  # Important for Git analysis!
       
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -319,7 +319,7 @@ jobs:
 
 #### 3.2 GitLab CI
 
-Создайте `.gitlab-ci.yml`:
+Create `.gitlab-ci.yml`:
 
 ```yaml
 stages:
@@ -364,7 +364,7 @@ lint-changed:
 
 #### 3.3 Jenkins
 
-Создайте `Jenkinsfile`:
+Create `Jenkinsfile`:
 
 ```groovy
 pipeline {
@@ -410,27 +410,27 @@ pipeline {
 }
 ```
 
-### Этап 4: Постепенное внедрение (Rollout Strategy)
+### Stage 4: Gradual Rollout Strategy
 
-#### 4.1 Фаза 1: Только логирование (неделя 1-2)
+#### 4.1 Phase 1: Logging Only (Week 1-2)
 
 ```kotlin
 impactAnalysis {
     baseBranch.set("origin/main")
-    // Пока просто смотрим что анализируется
+    // Just observe what's being analyzed
 }
 ```
 
-Запускайте в CI:
+Run in CI:
 
 ```bash
 ./gradlew calculateImpact
 cat build/impact-analysis/result.json
 ```
 
-Анализируйте результаты, но не запускайте тесты на основе них.
+Analyze results but don't run tests based on them.
 
-#### 4.2 Фаза 2: Параллельно с полным прогоном (неделя 3-4)
+#### 4.2 Phase 2: Parallel with Full Run (Week 3-4)
 
 ```yaml
 # GitHub Actions
@@ -442,31 +442,31 @@ cat build/impact-analysis/result.json
   continue-on-error: true
 ```
 
-Сравнивайте результаты и время выполнения.
+Compare results and execution time.
 
-#### 4.3 Фаза 3: Impact tests для feature веток (неделя 5-6)
+#### 4.3 Phase 3: Impact Tests for Feature Branches (Week 5-6)
 
 ```kotlin
 // build.gradle.kts
 impactAnalysis {
     baseBranch.set("origin/main")
     
-    // Только для feature веток используем impact analysis
+    // Use impact analysis only for feature branches
     if (System.getenv("CI_BRANCH")?.startsWith("feature/") == true) {
         runUnitTestsByDefaultProperty.set(true)
     }
 }
 ```
 
-#### 4.4 Фаза 4: Полное внедрение (неделя 7+)
+#### 4.4 Phase 4: Full Deployment (Week 7+)
 
-Переключитесь полностью на impact tests для всех PR.
+Switch completely to impact tests for all PRs.
 
 ---
 
-## 🔧 Настройка под конкретные проекты
+## 🔧 Project-Specific Configuration
 
-### Android проект
+### Android Project
 
 ```kotlin
 impactAnalysis {
@@ -498,7 +498,7 @@ impactAnalysis {
 }
 ```
 
-### Backend проект
+### Backend Project
 
 ```kotlin
 impactAnalysis {
@@ -541,7 +541,7 @@ impactAnalysis {
     
     runAllTestsOnCriticalChanges.set(true)
     
-    // Contract тесты при изменении API
+    // Contract tests on API changes
     testType(TestType.CONTRACT) {
         whenChanged("**/api/**", "**/contract/**", "libs/api-contracts/**")
         runOnlyInChangedModules = false
@@ -551,27 +551,27 @@ impactAnalysis {
 
 ---
 
-## 📊 Мониторинг и метрики
+## 📊 Monitoring and Metrics
 
-### Что отслеживать
+### What to Track
 
-1. **Время выполнения**
-    - До: полный прогон всех тестов
-    - После: impact tests
-    - Процент экономии
+1. **Execution Time**
+   - Before: full test run
+   - After: impact tests
+   - Percentage saved
 
-2. **Покрытие**
-    - Все ли необходимые тесты запускаются
-    - Нет ли ложных пропусков
+2. **Coverage**
+   - Are all necessary tests running
+   - No false negatives
 
-3. **Стабильность**
-    - Количество false positives
-    - Количество missed issues
+3. **Stability**
+   - Number of false positives
+   - Number of missed issues
 
-### Дашборд (пример для Grafana)
+### Dashboard (example for Grafana)
 
 ```yaml
-# Метрики для Prometheus
+# Metrics for Prometheus
 impact_analysis_execution_time_seconds
 impact_analysis_changed_files_total
 impact_analysis_affected_modules_total
@@ -581,72 +581,72 @@ impact_analysis_time_saved_seconds
 
 ---
 
-## 🎯 Критерии успеха
+## 🎯 Success Criteria
 
-### Week 1-2: Пилот
+### Week 1-2: Pilot
 
-- ✅ Плагин успешно установлен
-- ✅ Анализ работает корректно
-- ✅ Результаты логируются
+- ✅ Plugin successfully installed
+- ✅ Analysis works correctly
+- ✅ Results are logged
 
-### Week 3-4: Валидация
+### Week 3-4: Validation
 
-- ✅ Impact tests находят те же проблемы что и full tests
-- ✅ Время экономится в среднем на 40%+
-- ✅ Нет критических false negatives
+- ✅ Impact tests find same issues as full tests
+- ✅ Time saved on average 40%+
+- ✅ No critical false negatives
 
-### Week 5-6: Раскатка
+### Week 5-6: Rollout
 
-- ✅ Работает на feature ветках
-- ✅ Команда довольна результатами
-- ✅ CI/CD стал быстрее
+- ✅ Works on feature branches
+- ✅ Team is satisfied with results
+- ✅ CI/CD is faster
 
 ### Week 7+: Production
 
-- ✅ Все PR используют impact tests
-- ✅ Метрики собираются и анализируются
-- ✅ ROI положительный
+- ✅ All PRs use impact tests
+- ✅ Metrics collected and analyzed
+- ✅ ROI is positive
 
 ---
 
-## 🚧 Потенциальные проблемы и решения
+## 🚧 Potential Issues and Solutions
 
-### Проблема 1: Плагин не находит модули
+### Issue 1: Plugin Doesn't Find Modules
 
-**Причина:** Нестандартная структура проекта
+**Cause:** Non-standard project structure
 
-**Решение:**
+**Solution:**
 
 ```kotlin
-// Можно вручную указать модули если нужно
+// Plugin automatically finds modules via Gradle API
+// Can add logging for debugging
 impactAnalysis {
-    // Плагин автоматически найдет через Gradle API
-    // Но можно добавить логирование для отладки
+    // Plugin will discover modules automatically
 }
 ```
 
-### Проблема 2: Тесты пропускаются
+### Issue 2: Tests Are Skipped
 
-**Причина:** Слишком строгие правила `whenChanged`
+**Cause:** Too strict `whenChanged` rules
 
-**Решение:**
+**Solution:**
 
 ```kotlin
 unitTests {
-    // Более широкие паттерны
+    // Wider patterns
     whenChanged("**/*.kt", "**/*.java")
     runOnlyInChangedModules = false
 }
 ```
 
-### Проблема 3: Граф зависимостей неполный
+### Issue 3: Incomplete Dependency Graph
 
-**Причина:** Динамические зависимости
+**Cause:** Dynamic dependencies
 
-**Решение:**
+**Solution:**
 
 ```kotlin
-// Запускать все тесты для критических изменений
+// Run all tests for critical changes
 criticalPaths.set(listOf(
     "build.gradle",
     "dependencies.gradle"
@@ -656,28 +656,28 @@ runAllTestsOnCriticalChanges.set(true)
 
 ---
 
-## 📞 Поддержка
+## 📞 Support
 
-- **Документация:** [README.md](README.md)
-- **Быстрый старт:** [QUICK_START.md](QUICK_START.md)
-- **Архитектура:** [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Примеры:** [examples/](examples/)
+- **Documentation:** [README.md](README.md)
+- **Quick Start:** [QUICK_START.md](QUICK_START.md)
+- **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Examples:** [examples/](examples/)
 
 ---
 
-## ✅ Чеклист внедрения
+## ✅ Deployment Checklist
 
-- [ ] Собрать плагин (`./gradlew build`)
-- [ ] Протестировать на тестовом проекте
-- [ ] Опубликовать плагин
-- [ ] Подключить в целевом проекте
-- [ ] Настроить под специфику проекта
-- [ ] Запустить первый анализ
-- [ ] Интегрировать с CI/CD
-- [ ] Запустить пилот на неделю
-- [ ] Собрать метрики
-- [ ] Раскатить на все ветки
-- [ ] Настроить мониторинг
-- [ ] Обучить команду
+- [ ] Build plugin (`./gradlew build`)
+- [ ] Test on test project
+- [ ] Publish plugin
+- [ ] Connect to target project
+- [ ] Configure for project specifics
+- [ ] Run first analysis
+- [ ] Integrate with CI/CD
+- [ ] Run pilot for a week
+- [ ] Collect metrics
+- [ ] Roll out to all branches
+- [ ] Set up monitoring
+- [ ] Train the team
 
-**Удачи с внедрением! 🚀**
+**Good luck with deployment! 🚀**

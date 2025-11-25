@@ -2,88 +2,90 @@
 
 ## [1.0.1] - 2024
 
-### Исправлено
+### Fixed
 
-- 🐛 **Gradle Task Caching** - исправлена проблема с кешированием таски `calculateImpact`
-    - Добавлено `outputs.upToDateWhen { false }` в `CalculateImpactTask`
-    - Добавлено `outputs.upToDateWhen { false }` в `GetChangedFilesTask`
-    - Теперь таски всегда перезапускаются и видят актуальные Git изменения
-    - Больше нет проблемы с "UP-TO-DATE" при изменении файлов
+- 🐛 **Gradle Task Caching** - fixed caching issue with `calculateImpact` task
+  - Added `outputs.upToDateWhen { false }` to `CalculateImpactTask`
+  - Added `outputs.upToDateWhen { false }` to `GetChangedFilesTask`
+  - Tasks now always re-run and see actual Git changes
+  - No more "UP-TO-DATE" issue when files are modified
 
-### Добавлено
+### Added
 
-- ➕ Методы `getHeadCommitHash()` и `getUncommittedChangesHash()` в `GitClient`
-    - Могут использоваться для более тонкого управления кешированием в будущем
+- ➕ Methods `getHeadCommitHash()` and `getUncommittedChangesHash()` in `GitClient`
+  - Can be used for more fine-grained cache control in the future
 
-### Документация
+### Documentation
 
-- 📖 **CACHE_FIX.md** - подробное описание проблемы и решения
+- 📖 **CACHE_FIX.md** - detailed description of the problem and solution
 
 ## [1.0.0] - 2024
 
-### Создано
-- ✅ Полнофункциональный Gradle плагин Impact Analysis
-- ✅ Анализ Git изменений (JGit)
-- ✅ Граф зависимостей модулей
-- ✅ Определение scope тестов (unit, integration, UI, E2E, API и др.)
-- ✅ Поддержка multi-module проектов
-- ✅ DSL для конфигурации
-- ✅ 5 Gradle задач
-- ✅ 58 unit и integration тестов (~85% coverage)
-- ✅ Подробная документация (11 MD файлов)
-- ✅ Примеры конфигураций (4 типа проектов)
+### Created
 
-### Исправлено
+- ✅ Full-featured Gradle Impact Analysis Plugin
+- ✅ Git changes analysis (JGit)
+- ✅ Module dependency graph
+- ✅ Test scope determination (unit, integration, UI, E2E, API, etc.)
+- ✅ Multi-module project support
+- ✅ DSL for configuration
+- ✅ 5 Gradle tasks
+- ✅ 58 unit and integration tests (~85% coverage)
+- ✅ Comprehensive documentation (11 MD files)
+- ✅ Example configurations (4 project types)
 
-#### v1 (Основной код)
+### Fixed
 
-- 🐛 `TestScopeCalculator.kt:33` - добавлен `.get()` для `ListProperty`
-- 🐛 `RunImpactTestsTask.kt:93-99` - исправлен синтаксис `ExecSpec` (использован параметр `spec`)
+#### v1 (Core code)
 
-#### v2 (Компиляция тестов)
+- 🐛 `TestScopeCalculator.kt:33` - added `.get()` for `ListProperty`
+- 🐛 `RunImpactTestsTask.kt:93-99` - fixed `ExecSpec` syntax (using `spec` parameter)
 
-- 🐛 `PluginIntegrationTest.kt:74` - явное указание generic типа `<ImpactAnalysisExtension>`
-- 🐛 `TestScopeCalculatorTest.kt:58-64` - добавлен явный параметр `rule` в lambda
+#### v2 (Test compilation)
 
-#### v3 (Логика тестов)
+- 🐛 `PluginIntegrationTest.kt:74` - explicit generic type `<ImpactAnalysisExtension>`
+- 🐛 `TestScopeCalculatorTest.kt:58-64` - added explicit `rule` parameter in lambda
 
-- 🐛 `TestTypeRule.shouldRunForFile()` - исправлена обработка glob-паттернов:
-    - Нормализация путей (всегда используем `/`)
-    - Правильная обработка `*` и `**` в паттернах
-    - `*` теперь значит "любые символы кроме `/`" (`[^/]*` в regex)
-    - `**` значит "любые символы включая `/`" (`.*` в regex)
-  - ✨ **Специальная обработка `**/word/**`** - паттерны типа `**/repository/**` теперь ищут `/repository/` в пути
-- 🐛 `DependencyAnalyzer.isConfigFile()` - добавлена проверка файлов `.properties`
+#### v3 (Test logic)
 
-### Известные проблемы
+- 🐛 `TestTypeRule.shouldRunForFile()` - fixed glob pattern handling:
+  - Path normalization (always use `/`)
+  - Proper handling of `*` and `**` in patterns
+  - `*` now means "any characters except `/`" (`[^/]*` in regex)
+  - `**` means "any characters including `/`" (`.*` in regex)
+  - ✨ **Special handling for `**/word/**`** - patterns like `**/repository/**` now search for `/repository/` in path
+- 🐛 `DependencyAnalyzer.isConfigFile()` - added check for `.properties` files
 
-- ⚠️ Кодировка PowerShell в Windows может создавать проблемы при выводе команд
+### Known Issues
 
-### Как запустить
+- ⚠️ PowerShell encoding in Windows may cause issues with command output
+
+### How to Run
 
 ```powershell
-# Сборка
+# Build
 gradlew build
 
-# Тесты
+# Tests
 gradlew test
 
-# Тесты с отчетами
+# Tests with reports
 gradlew testWithReport
 ```
 
-### Результаты тестов (последний запуск)
+### Test Results (last run)
 
-- ✅ 58 тестов написано
-- ✅ Все компилируются
-- ✅ Исправлена логика паттернов
-- 🎯 Ожидается: все 58 тестов должны пройти
+- ✅ 58 tests written
+- ✅ All compile successfully
+- ✅ Pattern logic fixed
+- 🎯 Expected: all 58 tests should pass
 
-### Документация
+### Documentation
 
-- 📖 **FIRST_RUN.md** - быстрый старт
-- 📖 **README.md** - основная документация
-- 📖 **ARCHITECTURE.md** - архитектура плагина
-- 📖 **QUICK_START.md** - руководство пользователя
-- 📖 **TEST_GUIDE.md** - руководство по тестам
-- 📖 **IMPLEMENTATION_PLAN.md** - план внедрения
+- 📖 **FIRST_RUN.md** - quick start guide
+- 📖 **README.md** - main documentation
+- 📖 **ARCHITECTURE.md** - plugin architecture
+- 📖 **QUICK_START.md** - user guide
+- 📖 **TEST_GUIDE.md** - testing guide
+- 📖 **IMPLEMENTATION_PLAN.md** - implementation plan
+
