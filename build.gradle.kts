@@ -6,7 +6,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.1"
 }
 
-group = "com.nzr.impact-analysis"
+group = "com.nzr.impactanalysis"
 version = "1.0.1"
 
 repositories {
@@ -35,8 +35,8 @@ gradlePlugin {
 
     plugins {
         create("impactAnalysisPlugin") {
-            id = "com.nzr.impact-analysis"
-            implementationClass = "com.nzr.impact_analysis.ImpactAnalysisPlugin"
+            id = "com.nzr.impactanalysis"
+            implementationClass = "com.nzr.impactanalysis.ImpactAnalysisPlugin"
             displayName = "Impact Analysis Plugin"
             description =
                 "Gradle plugin for automatic Git changes analysis and test scope determination in multi-module projects"
