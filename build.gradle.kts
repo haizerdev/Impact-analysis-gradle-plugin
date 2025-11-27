@@ -18,10 +18,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(gradleApi())
 
-    // JGit для работы с Git
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r")
 
-    // Для работы с JSON
     implementation("com.google.code.gson:gson:2.10.1")
 
     testImplementation(kotlin("test"))
@@ -52,18 +50,15 @@ kotlin {
 tasks.test {
     useJUnit()
 
-    // Показывать результаты тестов в консоли
     testLogging {
         events("passed", "skipped", "failed")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         showStandardStreams = false
     }
 
-    // Параллельное выполнение
     maxParallelForks = Runtime.getRuntime().availableProcessors()
 
-    // Увеличенная память
-    maxHeapSize = "2g"
+    maxHeapSize = "1g"
 
     // Coverage
     finalizedBy(tasks.jacocoTestReport)
@@ -78,7 +73,6 @@ tasks.jacocoTestReport {
         csv.required.set(false)
     }
 
-    // Минимальный coverage
     doLast {
         val report = file("${buildDir}/reports/jacoco/test/html/index.html")
         if (report.exists()) {
@@ -97,7 +91,6 @@ tasks.jacocoTestCoverageVerification {
     }
 }
 
-// Задача для запуска тестов с отчетом
 tasks.register("testWithReport") {
     group = "verification"
     description = "Run tests and generate coverage report"
