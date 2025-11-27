@@ -126,7 +126,7 @@ In root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.nzr.impactanalysis") version "1.0.4"
+    id("com.haizerdev.impactanalysis") version "1.0.4"
 }
 
 impactAnalysis {
@@ -215,7 +215,7 @@ In target project's root `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.nzr.impactanalysis") version "1.0.4"
+    id("com.haizerdev.impactanalysis") version "1.0.4"
 }
 
 impactAnalysis {

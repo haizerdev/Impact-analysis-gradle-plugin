@@ -7,13 +7,13 @@
 **Было:**
 
 ```kotlin
-id = "com.nzr.impact-analysis"  // ❌ Gradle преобразует в com.nzr.impact_analysis
+id = "com.haizerdev.impact-analysis"  // ❌ Gradle преобразует в com.haizerdev.impact_analysis
 ```
 
 **Стало:**
 
 ```kotlin
-id = "com.nzr.impactanalysis"  // ✅ Совпадает с package name
+id = "com.haizerdev.impactanalysis"  // ✅ Совпадает с package name
 ```
 
 **Результат:** Плагин теперь корректно собирается и может быть опубликован.
@@ -98,14 +98,14 @@ git push origin v1.0.4
 ### Build Gradle
 
 ```kotlin
-group = "com.nzr.impactanalysis"
+group = "com.haizerdev.impactanalysis"
 version = "1.0.3"
 
 gradlePlugin {
     plugins {
         create("impactAnalysisPlugin") {
-            id = "com.nzr.impactanalysis"  // ✅ Правильный ID
-            implementationClass = "com.nzr.impactanalysis.ImpactAnalysisPlugin"
+            id = "com.haizerdev.impactanalysis"  // ✅ Правильный ID
+            implementationClass = "com.haizerdev.impactanalysis.ImpactAnalysisPlugin"
             displayName = "Impact Analysis Plugin"
             description = "Gradle plugin for automatic Git changes analysis..."
         }
@@ -131,7 +131,7 @@ gradlePlugin {
 - **Репозиторий:** https://github.com/haizerdev/Impact-analysis-gradle-plugin
 - **GitHub Actions:** https://github.com/haizerdev/Impact-analysis-gradle-plugin/actions
 - **Инструкция по настройке:** [PUBLISH_SETUP.md](PUBLISH_SETUP.md)
-- **Gradle Plugin Portal:** https://plugins.gradle.org/plugin/com.nzr.impactanalysis (будет доступен после публикации)
+- **Gradle Plugin Portal:** https://plugins.gradle.org/plugin/com.haizerdev.impactanalysis (будет доступен после публикации)
 
 ---
 

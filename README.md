@@ -24,7 +24,7 @@ Gradle plugin for automatic Git changes analysis and test scope determination in
 
 ```kotlin
 plugins {
-    id("com.nzr.impactanalysis") version "1.0.4"
+    id("com.haizerdev.impactanalysis") version "1.0.4"
 }
 ```
 
