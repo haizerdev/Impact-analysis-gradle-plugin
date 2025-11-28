@@ -75,75 +75,72 @@ abstract class RunImpactTestsTask @Inject constructor(
             result.testsToRun
         }
 
-        logger.lifecycle("=".repeat(60))
-        logger.lifecycle("Running Impact Tests")
-        logger.lifecycle("=".repeat(60))
+        // Collect all test tasks to run in parallel (use Set to avoid duplicates)
+        val allTestTasks = mutableSetOf<String>()
 
-        val failedTasks = mutableListOf<String>()
-        var totalTasks = 0
-        var successfulTasks = 0
+        logger.lifecycle("=".repeat(60))
+        logger.lifecycle("Running Impact Tests (Parallel Execution)")
+        logger.lifecycle("=".repeat(60))
 
         testsToRun.forEach { (testType, tasks) ->
             logger.lifecycle("\n${testType.name} Tests (${tasks.size} tasks):")
             logger.lifecycle("-".repeat(60))
+            tasks.forEach { task ->
+                logger.lifecycle("  - $task")
+                allTestTasks.add(task)
+            }
+        }
 
-            tasks.forEach { taskPath ->
-                totalTasks++
-                logger.lifecycle("Running: $taskPath")
+        if (allTestTasks.isEmpty()) {
+            logger.lifecycle("No tests to run")
+            return
+        }
 
-                try {
-                    // Run task through exec
-                    val execResult = execOperations.exec { spec ->
-                        spec.workingDir = rootProjectDir.get().asFile
-                        if (isWindows) {
-                            spec.commandLine("cmd", "/c", "gradlew.bat", taskPath, "--no-daemon")
-                        } else {
-                            spec.commandLine("./gradlew", taskPath, "--no-daemon")
-                        }
-                        spec.isIgnoreExitValue = continueOnFailure.get()
-                    }
+        // Sort for consistent output
+        val sortedTasks = allTestTasks.sorted()
 
-                    if (execResult.exitValue == 0) {
-                        successfulTasks++
-                        logger.lifecycle("✓ $taskPath completed successfully")
-                    } else {
-                        failedTasks.add(taskPath)
-                        logger.error("✗ $taskPath failed")
+        logger.lifecycle("\n" + "=".repeat(60))
+        logger.lifecycle("Executing ${sortedTasks.size} unique test task(s) in parallel...")
+        logger.lifecycle("=".repeat(60))
 
-                        if (!continueOnFailure.get()) {
-                            throw RuntimeException("Test task $taskPath failed")
-                        }
-                    }
-                } catch (e: Exception) {
-                    failedTasks.add(taskPath)
-                    logger.error("✗ $taskPath failed: ${e.message}")
+        try {
+            // Run all tasks in a single Gradle command (parallel execution)
+            val command = if (isWindows) {
+                listOf("cmd", "/c", "gradlew.bat") + sortedTasks + listOf("--continue", "--no-daemon")
+            } else {
+                listOf("./gradlew") + sortedTasks + listOf("--continue", "--no-daemon")
+            }
 
-                    if (!continueOnFailure.get()) {
-                        throw e
-                    }
+            val execResult = execOperations.exec { spec ->
+                spec.workingDir = rootProjectDir.get().asFile
+                spec.commandLine(command)
+                spec.isIgnoreExitValue = continueOnFailure.get()
+            }
+
+            // Final report
+            logger.lifecycle("\n" + "=".repeat(60))
+            logger.lifecycle("Impact Tests Summary")
+            logger.lifecycle("=".repeat(60))
+
+            if (execResult.exitValue == 0) {
+                logger.lifecycle("✓ All ${sortedTasks.size} test task(s) completed successfully")
+            } else {
+                logger.lifecycle("⚠ Some tests failed (exit code: ${execResult.exitValue})")
+                logger.lifecycle("Run with --continue flag allows all tests to execute")
+
+                if (!continueOnFailure.get()) {
+                    throw RuntimeException("Some test tasks failed. See build output for details.")
                 }
             }
-        }
 
-        // Final report
-        logger.lifecycle("\n" + "=".repeat(60))
-        logger.lifecycle("Impact Tests Summary")
-        logger.lifecycle("=".repeat(60))
-        logger.lifecycle("Total tasks: $totalTasks")
-        logger.lifecycle("Successful: $successfulTasks")
-        logger.lifecycle("Failed: ${failedTasks.size}")
+            logger.lifecycle("=".repeat(60))
 
-        if (failedTasks.isNotEmpty()) {
-            logger.lifecycle("\nFailed tasks:")
-            failedTasks.forEach { task ->
-                logger.lifecycle("  ✗ $task")
-            }
+        } catch (e: Exception) {
+            logger.error("✗ Test execution failed: ${e.message}")
 
             if (!continueOnFailure.get()) {
-                throw RuntimeException("${failedTasks.size} test task(s) failed")
+                throw e
             }
         }
-
-        logger.lifecycle("=".repeat(60))
     }
 }

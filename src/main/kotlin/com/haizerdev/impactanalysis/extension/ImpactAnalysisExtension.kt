@@ -71,6 +71,24 @@ abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactor
     }
 
     /**
+     * Android build variant for unit tests (e.g., "Debug", "Release")
+     * If set, only this variant will be tested (e.g., testDebugUnitTest instead of test)
+     * For non-Android projects, this is ignored
+     */
+    val androidUnitTestVariant: Property<String> = objects.property(String::class.java).apply {
+        convention("Debug")
+    }
+
+    /**
+     * Android build variant for instrumented/UI tests (e.g., "Debug", "Release")
+     * If set, only this variant will be tested
+     * For non-Android projects, this is ignored
+     */
+    val androidInstrumentedTestVariant: Property<String> = objects.property(String::class.java).apply {
+        convention("Debug")
+    }
+
+    /**
      * Rules for determining test types
      */
     internal val testTypeRulesMap = mutableMapOf<TestType, TestTypeRule>()

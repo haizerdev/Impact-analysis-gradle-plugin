@@ -17,6 +17,8 @@ Gradle plugin for automatic Git changes analysis and test scope determination in
 - **Flexible configuration** - DSL for rule customization
 - **Uncommitted changes support** - analyze local changes
 - **Configuration cache support** ⚡ - full support for Gradle configuration cache for faster builds
+- **Parallel test execution** 🚀 - runs all tests in parallel using a single Gradle command (3-5x faster)
+- **Android variant support** 📱 - specify which build variant to test (Debug, Release, custom flavors)
 - **CI/CD time savings** - run only necessary tests (60-90% savings)
 
 ## Installation
@@ -134,7 +136,11 @@ git push origin v1.0.12
 impactAnalysis {
     baseBranch.set("origin/develop")
     includeUncommittedChanges.set(true)
-    
+
+    // Android build variants (run only Debug tests, not Debug + Release)
+    androidUnitTestVariant.set("Debug")           // testDebugUnitTest instead of test
+    androidInstrumentedTestVariant.set("Debug")  // connectedDebugAndroidTest
+
     unitTests {
         whenChanged("**/src/main/**/*.kt")
         runOnlyInChangedModules = false
@@ -156,6 +162,45 @@ impactAnalysis {
         "gradle/libs.versions.toml"
     ))
 }
+```
+
+For Android projects, you can specify which build variant to test:
+
+```kotlin
+impactAnalysis {
+    // Unit tests - specify which variant (Debug/Release/Staging/etc.)
+    androidUnitTestVariant.set("Debug")  // Default: "Debug"
+    // Result: :app:testDebugUnitTest instead of :app:test
+    
+    // Instrumented/UI tests - specify which variant
+    androidInstrumentedTestVariant.set("Debug")  // Default: "Debug"
+    // Result: :app:connectedDebugAndroidTest
+}
+```
+
+Available variants depend on your build configuration:
+
+- Standard: `Debug`, `Release`
+- Custom: `Staging`, `Production`, `Beta`, etc.
+- Multi-flavor: `ProdRelease`, `ProdDebug`, `DevRelease`, etc.
+
+**Examples:**
+
+```kotlin
+// Simple variant
+androidUnitTestVariant.set("Debug")
+// Result: testDebugUnitTest
+
+// Custom build type
+androidUnitTestVariant.set("Staging")
+// Result: testStagingUnitTest
+
+// Product flavor + build type
+androidUnitTestVariant.set("ProdRelease")
+// Result: testProdReleaseUnitTest
+
+// The plugin automatically detects your project's available test tasks
+// and finds the best match for your specified variant
 ```
 
 ### Backend Project (Spring Boot)

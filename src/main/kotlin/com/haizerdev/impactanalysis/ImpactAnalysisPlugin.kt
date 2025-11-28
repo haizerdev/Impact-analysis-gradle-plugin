@@ -46,6 +46,10 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             task.runUnitTestsByDefault.convention(extension.runUnitTestsByDefault)
             task.criticalPaths.convention(extension.criticalPaths)
 
+            // Android variant configuration
+            task.androidUnitTestVariant.convention(extension.androidUnitTestVariant)
+            task.androidInstrumentedTestVariant.convention(extension.androidInstrumentedTestVariant)
+
             // Serialize module dependency data during configuration
             task.moduleDependencies.convention(project.provider {
                 serializeModuleDependencies(project.rootProject)
@@ -196,17 +200,35 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             // Common test task names
             val commonTestTasks = listOf("test", "integrationTest", "uiTest", "e2eTest", "apiTest")
 
-            commonTestTasks.forEach { taskName ->
-                try {
-                    if (project.tasks.findByName(taskName) != null) {
+            try {
+                // Get all task names from the project
+                val allTaskNames = project.tasks.names
+
+                // Filter tasks that match test patterns
+                allTaskNames.forEach { taskName ->
+                    val isTestTask = commonTestTasks.contains(taskName) ||
+                            taskName.matches(Regex("test.*UnitTest")) ||           // Android unit tests
+                            taskName.matches(Regex("connected.*AndroidTest")) ||  // Android instrumented tests
+                            taskName.endsWith("Test")                              // Generic test tasks
+
+                    if (isTestTask) {
                         testTaskNames.add(taskName)
                     }
-                } catch (e: Exception) {
-                    // Task might not be configured yet
+                }
+            } catch (e: Exception) {
+                // If we can't get task names, fall back to checking common tasks
+                commonTestTasks.forEach { taskName ->
+                    try {
+                        if (project.tasks.findByName(taskName) != null) {
+                            testTaskNames.add(taskName)
+                        }
+                    } catch (ex: Exception) {
+                        // Task might not be configured yet
+                    }
                 }
             }
 
-            project.path to testTaskNames
+            project.path to testTaskNames.distinct()
         }
     }
 }

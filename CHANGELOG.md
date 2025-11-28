@@ -33,6 +33,27 @@
     - No more "invocation of 'Task.project' at execution time is unsupported" error
     - Significant build performance improvement when configuration cache is enabled (up to 70-80% faster)
 
+- ✨ **Android Build Variant Support** - Configure which build variant to test
+  - `androidUnitTestVariant` - specify which variant for unit tests (default: "Debug")
+  - `androidInstrumentedTestVariant` - specify which variant for UI/instrumented tests (default: "Debug")
+  - Generates variant-specific task names: `testDebugUnitTest` instead of `test`
+  - **Automatic detection** - plugin automatically discovers ALL test tasks in your project
+  - Supports custom variants: `testProdReleaseUnitTest`, `testStagingDebugUnitTest`, etc.
+  - Works with any product flavor and build type combination
+  - Avoids running tests for all variants (Debug, Release, etc.) when only one is needed
+  - Saves CI time and resources by testing only the variant you care about
+  - For non-Android projects, these settings are ignored
+
+- ✨ **Parallel Test Execution** - Tests and compilation now run in parallel
+  - `runImpactTests` executes all test tasks in a single Gradle command
+  - `runImpactKotlinCompile` executes all compilation tasks in a single Gradle command
+  - Example: `./gradlew :app:test :features:auth:test :features:profile:test` (parallel)
+  - Instead of running tasks sequentially one by one (slow)
+  - **Automatic deduplication** - prevents running the same task multiple times (e.g., when UI and E2E both generate
+    connectedDebugAndroidTest)
+  - Significant performance improvement - up to 3-5x faster for multi-module projects
+  - Gradle automatically handles task parallelization and dependency resolution
+
 ### Changed
 
 - 🔄 **Extension Architecture** - `ImpactAnalysisExtension` no longer directly implements `ImpactAnalysisConfig`

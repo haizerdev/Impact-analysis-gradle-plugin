@@ -60,78 +60,63 @@ abstract class RunImpactKotlinCompileTask @Inject constructor(
         }
 
         logger.lifecycle("=".repeat(60))
-        logger.lifecycle("Running Kotlin Compilation for Affected Modules")
+        logger.lifecycle("Running Kotlin Compilation for Affected Modules (Parallel)")
         logger.lifecycle("=".repeat(60))
 
-        val failedTasks = mutableListOf<String>()
-        var totalTasks = 0
-        var successfulTasks = 0
-
-        // Compile affected modules
-        result.affectedModules.forEach { modulePath ->
-            val compileTaskPath = if (modulePath == ":") {
+        // Collect all compilation tasks
+        val compileTasks = result.affectedModules.map { modulePath ->
+            if (modulePath == ":") {
                 ":compileKotlin"
             } else {
                 "$modulePath:compileKotlin"
             }
+        }
 
-            totalTasks++
-            logger.lifecycle("\nCompiling module: $modulePath")
-            logger.lifecycle("Task: $compileTaskPath")
-            logger.lifecycle("-".repeat(60))
+        compileTasks.forEach { task ->
+            logger.lifecycle("  - $task")
+        }
 
-            try {
-                // Run task through exec
-                val execResult = execOperations.exec { spec ->
-                    spec.workingDir = rootProjectDir.get().asFile
-                    if (isWindows) {
-                        spec.commandLine("cmd", "/c", "gradlew.bat", compileTaskPath, "--no-daemon")
-                    } else {
-                        spec.commandLine("./gradlew", compileTaskPath, "--no-daemon")
-                    }
-                    spec.isIgnoreExitValue = continueOnFailure.get()
-                }
+        logger.lifecycle("\n" + "=".repeat(60))
+        logger.lifecycle("Executing ${compileTasks.size} compilation task(s) in parallel...")
+        logger.lifecycle("=".repeat(60))
 
-                if (execResult.exitValue == 0) {
-                    successfulTasks++
-                    logger.lifecycle("✓ $compileTaskPath completed successfully")
-                } else {
-                    failedTasks.add(compileTaskPath)
-                    logger.error("✗ $compileTaskPath failed")
+        try {
+            // Run all tasks in a single Gradle command (parallel execution)
+            val command = if (isWindows) {
+                listOf("cmd", "/c", "gradlew.bat") + compileTasks + listOf("--continue", "--no-daemon")
+            } else {
+                listOf("./gradlew") + compileTasks + listOf("--continue", "--no-daemon")
+            }
 
-                    if (!continueOnFailure.get()) {
-                        throw RuntimeException("Compilation task $compileTaskPath failed")
-                    }
-                }
-            } catch (e: Exception) {
-                failedTasks.add(compileTaskPath)
-                logger.error("✗ $compileTaskPath failed: ${e.message}")
+            val execResult = execOperations.exec { spec ->
+                spec.workingDir = rootProjectDir.get().asFile
+                spec.commandLine(command)
+                spec.isIgnoreExitValue = continueOnFailure.get()
+            }
+
+            // Final report
+            logger.lifecycle("\n" + "=".repeat(60))
+            logger.lifecycle("Kotlin Compilation Summary")
+            logger.lifecycle("=".repeat(60))
+
+            if (execResult.exitValue == 0) {
+                logger.lifecycle("✓ All ${compileTasks.size} compilation task(s) completed successfully")
+            } else {
+                logger.lifecycle("⚠ Some compilation tasks failed (exit code: ${execResult.exitValue})")
 
                 if (!continueOnFailure.get()) {
-                    throw e
+                    throw RuntimeException("Some compilation tasks failed. See build output for details.")
                 }
             }
-        }
 
-        // Final report
-        logger.lifecycle("\n" + "=".repeat(60))
-        logger.lifecycle("Kotlin Compilation Summary")
-        logger.lifecycle("=".repeat(60))
-        logger.lifecycle("Total tasks: $totalTasks")
-        logger.lifecycle("Successful: $successfulTasks")
-        logger.lifecycle("Failed: ${failedTasks.size}")
+            logger.lifecycle("=".repeat(60))
 
-        if (failedTasks.isNotEmpty()) {
-            logger.lifecycle("\nFailed tasks:")
-            failedTasks.forEach { task ->
-                logger.lifecycle("  ✗ $task")
-            }
+        } catch (e: Exception) {
+            logger.error("✗ Compilation failed: ${e.message}")
 
             if (!continueOnFailure.get()) {
-                throw RuntimeException("${failedTasks.size} compilation task(s) failed")
+                throw e
             }
         }
-
-        logger.lifecycle("=".repeat(60))
     }
 }

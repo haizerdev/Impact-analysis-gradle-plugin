@@ -91,6 +91,20 @@ abstract class CalculateImpactTask : DefaultTask() {
     @get:Input
     abstract val availableTestTasks: MapProperty<String, List<String>>
 
+    /**
+     * Android build variant for unit tests (e.g., "Debug")
+     */
+    @get:Input
+    @get:Optional
+    abstract val androidUnitTestVariant: Property<String>
+
+    /**
+     * Android build variant for instrumented tests (e.g., "Debug")
+     */
+    @get:Input
+    @get:Optional
+    abstract val androidInstrumentedTestVariant: Property<String>
+
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
@@ -139,7 +153,9 @@ abstract class CalculateImpactTask : DefaultTask() {
             dependencyGraph = dependencyGraph,
             dependencyAnalyzer = dependencyAnalyzer,
             config = extensionData,
-            availableTestTasks = availableTestTasks.get()
+            availableTestTasks = availableTestTasks.get(),
+            androidUnitTestVariant = androidUnitTestVariant.get(),
+            androidInstrumentedTestVariant = androidInstrumentedTestVariant.get()
         )
 
         // Create components
@@ -407,7 +423,9 @@ class SerializedTestScopeCalculator(
     private val dependencyGraph: SerializedDependencyGraph,
     private val dependencyAnalyzer: SerializedDependencyAnalyzer,
     private val config: com.haizerdev.impactanalysis.scope.ImpactAnalysisConfig,
-    private val availableTestTasks: Map<String, List<String>>
+    private val availableTestTasks: Map<String, List<String>>,
+    private val androidUnitTestVariant: String,
+    private val androidInstrumentedTestVariant: String
 ) {
     /**
      * Calculate which tests need to be run
@@ -478,11 +496,49 @@ class SerializedTestScopeCalculator(
     private fun generateTestTasks(modules: Set<String>, testType: TestType): List<String> {
         return modules.mapNotNull { modulePath ->
             val tasks = availableTestTasks[modulePath] ?: emptyList()
-            if (tasks.contains(testType.taskSuffix)) {
+
+            // Generate task name based on test type and Android variant
+            val taskName = when {
+                // Android unit tests with variant
+                testType == TestType.UNIT && androidUnitTestVariant.isNotEmpty() -> {
+                    // Try to find exact match for the variant
+                    val variantTaskName = "test${androidUnitTestVariant.replaceFirstChar { it.uppercase() }}UnitTest"
+                    if (tasks.contains(variantTaskName)) {
+                        variantTaskName
+                    } else {
+                        // Try to find any task that contains the variant name (e.g., testProdReleaseUnitTest)
+                        tasks.find {
+                            it.startsWith("test") &&
+                                    it.endsWith("UnitTest") &&
+                                    it.contains(androidUnitTestVariant, ignoreCase = true)
+                        } ?: testType.taskSuffix
+                    }
+                }
+                // Android UI/instrumented tests with variant
+                (testType == TestType.UI || testType == TestType.E2E) && androidInstrumentedTestVariant.isNotEmpty() -> {
+                    // Try to find exact match for the variant
+                    val variantTaskName =
+                        "connected${androidInstrumentedTestVariant.replaceFirstChar { it.uppercase() }}AndroidTest"
+                    if (tasks.contains(variantTaskName)) {
+                        variantTaskName
+                    } else {
+                        // Try to find any task that contains the variant name
+                        tasks.find {
+                            it.startsWith("connected") &&
+                                    it.endsWith("AndroidTest") &&
+                                    it.contains(androidInstrumentedTestVariant, ignoreCase = true)
+                        } ?: testType.taskSuffix
+                    }
+                }
+                // Default task name
+                else -> testType.taskSuffix
+            }
+
+            if (tasks.contains(taskName) || tasks.contains(testType.taskSuffix)) {
                 if (modulePath == ":") {
-                    testType.taskSuffix
+                    taskName
                 } else {
-                    "$modulePath:${testType.taskSuffix}"
+                    "$modulePath:$taskName"
                 }
             } else {
                 null
