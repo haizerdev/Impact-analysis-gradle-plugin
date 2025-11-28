@@ -56,7 +56,7 @@ jobs:
       - name: Publish to GitHub Packages Maven
         env:
           USERNAME: ${{ github.actor }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
         run: ./gradlew publish
 
       - name: Upload Plugin Jar to GitHub Release
