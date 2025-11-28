@@ -126,6 +126,7 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             task.group = "impact analysis"
 
             task.rootProjectDir.convention(project.layout.projectDirectory)
+            task.androidCompileVariant.convention(extension.androidCompileVariant)
 
             // Depends on calculateImpact
             task.dependsOn("calculateImpact")
@@ -185,10 +186,17 @@ class ImpactAnalysisPlugin : Plugin<Project> {
     }
 
     private fun serializeModuleDirectories(rootProject: Project): Map<String, String> {
-        return rootProject.allprojects.associate { project ->
-            val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path
-            project.path to if (relativePath.isEmpty() || relativePath == ".") "" else relativePath
-        }
+        return rootProject.allprojects.mapNotNull { project ->
+            // Check if this is an actual module (has a build file)
+            val hasBuildFile = project.buildFile.exists()
+
+            if (hasBuildFile) {
+                val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path
+                project.path to if (relativePath.isEmpty() || relativePath == ".") "" else relativePath
+            } else {
+                null
+            }
+        }.toMap()
     }
 
     private fun serializeAvailableTestTasks(rootProject: Project): Map<String, List<String>> {

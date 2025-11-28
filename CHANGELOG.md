@@ -5,12 +5,18 @@
 ### Fixed
 
 - 🐛 **Extension Property Names** - Fixed property naming to match Gradle conventions
-    - Renamed `criticalPathsProperty` → `criticalPaths`
-    - Renamed `lintFileExtensionsProperty` → `lintFileExtensions`
-    - Renamed `runAllTestsOnCriticalChangesProperty` → `runAllTestsOnCriticalChanges`
-    - Renamed `runUnitTestsByDefaultProperty` → `runUnitTestsByDefault`
-    - Users can now use `.set()` directly: `criticalPaths.set(listOf(...))`
-    - Fixed "Unresolved reference" error when configuring the plugin
+  - Renamed `criticalPathsProperty` → `criticalPaths`
+  - Renamed `lintFileExtensionsProperty` → `lintFileExtensions`
+  - Renamed `runAllTestsOnCriticalChangesProperty` → `runAllTestsOnCriticalChanges`
+  - Renamed `runUnitTestsByDefaultProperty` → `runUnitTestsByDefault`
+  - Users can now use `.set()` directly: `criticalPaths.set(listOf(...))`
+  - Fixed "Unresolved reference" error when configuring the plugin
+
+- 🐛 **Non-Module Directories** - Fixed issue with directories that contain submodules
+  - Plugin now correctly filters out directories that are not actual Gradle modules
+  - Example: `:features:main` directory containing `:features:main:public_api` and `:features:main:impl`
+  - Prevents errors like "task 'compileKotlin' not found" for non-module directories
+  - Only actual modules with `build.gradle` files are now included in analysis
 
 ### Removed
 
@@ -36,7 +42,9 @@
 - ✨ **Android Build Variant Support** - Configure which build variant to test
   - `androidUnitTestVariant` - specify which variant for unit tests (default: "Debug")
   - `androidInstrumentedTestVariant` - specify which variant for UI/instrumented tests (default: "Debug")
+  - `androidCompileVariant` - specify which variant for Kotlin compilation (default: "Debug")
   - Generates variant-specific task names: `testDebugUnitTest` instead of `test`
+  - Generates variant-specific compile tasks: `compileDebugKotlin` instead of `compileKotlin`
   - **Automatic detection** - plugin automatically discovers ALL test tasks in your project
   - Supports custom variants: `testProdReleaseUnitTest`, `testStagingDebugUnitTest`, etc.
   - Works with any product flavor and build type combination

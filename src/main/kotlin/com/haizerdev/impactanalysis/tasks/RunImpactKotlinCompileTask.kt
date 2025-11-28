@@ -27,6 +27,10 @@ abstract class RunImpactKotlinCompileTask @Inject constructor(
     @get:Internal
     abstract val rootProjectDir: DirectoryProperty
 
+    @get:Input
+    @get:Optional
+    abstract val androidCompileVariant: Property<String>
+
     private val isWindows: Boolean = System.getProperty("os.name").lowercase().contains("win")
 
     init {
@@ -38,6 +42,7 @@ abstract class RunImpactKotlinCompileTask @Inject constructor(
         )
 
         continueOnFailure.convention(false)
+        androidCompileVariant.convention("Debug")
     }
 
     @TaskAction
@@ -63,12 +68,22 @@ abstract class RunImpactKotlinCompileTask @Inject constructor(
         logger.lifecycle("Running Kotlin Compilation for Affected Modules (Parallel)")
         logger.lifecycle("=".repeat(60))
 
+        val variant = androidCompileVariant.orNull
+
         // Collect all compilation tasks
         val compileTasks = result.affectedModules.map { modulePath ->
-            if (modulePath == ":") {
-                ":compileKotlin"
+            val taskName = if (variant != null && variant.isNotEmpty()) {
+                // Android project - use variant-specific task
+                "compile${variant.replaceFirstChar { it.uppercase() }}Kotlin"
             } else {
-                "$modulePath:compileKotlin"
+                // Non-Android project - use standard task
+                "compileKotlin"
+            }
+
+            if (modulePath == ":") {
+                taskName
+            } else {
+                "$modulePath:$taskName"
             }
         }
 
@@ -78,6 +93,9 @@ abstract class RunImpactKotlinCompileTask @Inject constructor(
 
         logger.lifecycle("\n" + "=".repeat(60))
         logger.lifecycle("Executing ${compileTasks.size} compilation task(s) in parallel...")
+        if (variant != null && variant.isNotEmpty()) {
+            logger.lifecycle("Android variant: $variant")
+        }
         logger.lifecycle("=".repeat(60))
 
         try {

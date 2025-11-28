@@ -140,6 +140,7 @@ impactAnalysis {
     // Android build variants (run only Debug tests, not Debug + Release)
     androidUnitTestVariant.set("Debug")           // testDebugUnitTest instead of test
     androidInstrumentedTestVariant.set("Debug")  // connectedDebugAndroidTest
+    androidCompileVariant.set("Debug")           // compileDebugKotlin instead of compileKotlin
 
     unitTests {
         whenChanged("**/src/main/**/*.kt")
@@ -175,6 +176,10 @@ impactAnalysis {
     // Instrumented/UI tests - specify which variant
     androidInstrumentedTestVariant.set("Debug")  // Default: "Debug"
     // Result: :app:connectedDebugAndroidTest
+
+    // Kotlin compilation - specify which variant
+    androidCompileVariant.set("Debug")  // Default: "Debug"
+    // Result: :app:compileDebugKotlin instead of :app:compileKotlin
 }
 ```
 

@@ -89,6 +89,15 @@ abstract class ImpactAnalysisExtension @Inject constructor(objects: ObjectFactor
     }
 
     /**
+     * Android build variant for Kotlin compilation (e.g., "Debug", "Release")
+     * If set, only this variant will be compiled (e.g., compileDebugKotlin instead of compileKotlin)
+     * For non-Android projects, this is ignored
+     */
+    val androidCompileVariant: Property<String> = objects.property(String::class.java).apply {
+        convention("Debug")
+    }
+
+    /**
      * Rules for determining test types
      */
     internal val testTypeRulesMap = mutableMapOf<TestType, TestTypeRule>()
