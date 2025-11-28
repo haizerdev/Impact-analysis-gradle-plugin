@@ -12,6 +12,13 @@
     - Users can now use `.set()` directly: `criticalPaths.set(listOf(...))`
     - Fixed "Unresolved reference" error when configuring the plugin
 
+### Removed
+
+- 🗑️ **Redundant Task** - Removed `impactTest` task
+  - This task was just an alias for `runImpactTests` without adding any value
+  - Use `./gradlew runImpactTests` directly instead
+  - Simplified plugin API and reduced confusion
+
 ### Added
 
 - ✨ **Configuration Cache Support** - Plugin now fully supports Gradle configuration cache for ALL tasks

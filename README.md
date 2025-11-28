@@ -126,12 +126,6 @@ git push origin v1.0.12
 ./gradlew runImpactTests
 ```
 
-### Full flow: analysis + run tests
-
-```bash
-./gradlew impactTest
-```
-
 ## Configuration Examples
 
 ### Android Project
@@ -218,7 +212,7 @@ impactAnalysis {
 | `getChangedFiles`        | Get list of changed files                      |
 | `getChangedFilesForLint` | Get list of files for linting (.kt, .java)     |
 | `runImpactTests`         | Run tests based on impact analysis             |
-| `impactTest`             | Full flow: analysis + run tests                |
+| `runImpactKotlinCompile` | Run Kotlin compilation for affected modules    |
 
 ## Configuration Parameters
 

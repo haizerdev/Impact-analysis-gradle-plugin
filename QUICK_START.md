@@ -68,7 +68,7 @@ cat build/impact-analysis/result.json
 ### 4. Run Only Necessary Tests
 
 ```bash
-./gradlew impactTest
+./gradlew runImpactTests
 ```
 
 This automatically:
@@ -184,7 +184,7 @@ jobs:
           java-version: '17'
       
       - name: Run Impact Tests
-        run: ./gradlew impactTest -PbaseBranch=origin/${{ github.base_ref }}
+        run: ./gradlew runImpactTests -PbaseBranch=origin/${{ github.base_ref }}
 ```
 
 ### GitLab CI
@@ -194,7 +194,7 @@ impact-test:
   stage: test
   script:
     - git fetch origin $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - ./gradlew impactTest -PbaseBranch=origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - ./gradlew runImpactTests -PbaseBranch=origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
 ```
 
 ### Jenkins
@@ -202,7 +202,7 @@ impact-test:
 ```groovy
 stage('Impact Tests') {
     steps {
-        sh './gradlew impactTest -PbaseBranch=origin/main'
+        sh './gradlew runImpactTests -PbaseBranch=origin/main'
     }
 }
 ```

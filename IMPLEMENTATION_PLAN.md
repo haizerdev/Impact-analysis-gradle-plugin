@@ -64,13 +64,13 @@ impact-analysis-plugin/
 - Handle critical changes
 - Generate task lists
 
-✅ **Gradle Tasks** - 5 tasks
+✅ **Gradle Tasks**
 
 - calculateImpact
 - getChangedFiles
 - getChangedFilesForLint
 - runImpactTests
-- impactTest
+- runImpactKotlinCompile
 
 ### 3. Documentation
 
@@ -247,7 +247,7 @@ impactAnalysis {
 # - getChangedFiles
 # - getChangedFilesForLint
 # - runImpactTests
-# - impactTest
+# - runImpactKotlinCompile
 
 # 2. Create test change
 echo "// test" >> some-module/src/main/SomeFile.kt

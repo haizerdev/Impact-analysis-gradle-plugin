@@ -78,7 +78,7 @@ tasks.register("testChangedServices") {
     group = "verification"
     description = "Test only changed services and their dependencies"
 
-    dependsOn("impactTest")
+    dependsOn("runImpactTests")
 }
 
 tasks.register("integrationTestImpact") {
@@ -118,4 +118,10 @@ tasks.register("checkDatabaseMigrations") {
             }
         }
     }
+}
+
+tasks.register("testAll") {
+    description = "Run all tests with coverage"
+    group = "verification"
+    dependsOn("runImpactTests")
 }

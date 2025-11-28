@@ -53,7 +53,7 @@ class PluginIntegrationTest {
         assertNotNull(rootProject.tasks.findByName("getChangedFiles"))
         assertNotNull(rootProject.tasks.findByName("getChangedFilesForLint"))
         assertNotNull(rootProject.tasks.findByName("runImpactTests"))
-        assertNotNull(rootProject.tasks.findByName("impactTest"))
+        assertNotNull(rootProject.tasks.findByName("runImpactKotlinCompile"))
     }
 
     @Test

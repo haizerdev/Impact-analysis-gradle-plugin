@@ -126,14 +126,6 @@ class ImpactAnalysisPlugin : Plugin<Project> {
             // Depends on calculateImpact
             task.dependsOn("calculateImpact")
         }
-
-        // Task for complete flow: analyze + test
-        project.tasks.register("impactTest") { task ->
-            task.description = "Calculate impact and run affected tests"
-            task.group = "impact analysis"
-
-            task.dependsOn("runImpactTests")
-        }
     }
 
     private fun serializeModuleDependencies(rootProject: Project): Map<String, List<String>> {
