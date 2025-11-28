@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.haizerdev.impactanalysis"
-version = "1.0.12"
+version = "1.0.14"
 
 repositories {
     mavenCentral()
