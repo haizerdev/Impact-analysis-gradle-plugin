@@ -1,4 +1,4 @@
-// Пример конфигурации для Android multi-module проекта
+// Example configuration for Android multi-module project
 
 plugins {
     id("com.impactanalysis.plugin") version "1.0.0"
@@ -8,7 +8,7 @@ impactAnalysis {
     baseBranch.set("origin/develop")
     compareBranch.set("HEAD")
 
-    // Критические файлы - запускаем все тесты
+    // Critical files - triggers all tests
     criticalPaths.set(
         listOf(
             "build.gradle",
@@ -19,7 +19,7 @@ impactAnalysis {
         )
     )
 
-    // Unit тесты (JVM)
+    // Run unit tests (JVM)
     unitTests {
         isEnable = true
         whenChanged(
@@ -30,7 +30,7 @@ impactAnalysis {
         runOnlyInChangedModules = false
     }
 
-    // Android Instrumentation тесты
+    // Android Instrumentation tests
     integrationTests {
         isEnable = false
         whenChanged(
@@ -43,7 +43,7 @@ impactAnalysis {
         runOnlyInChangedModules = true
     }
 
-    // UI тесты (Compose/Espresso)
+    // Run UI tests (Compose/Espresso)
     uiTests {
         isEnable = true
         whenChanged(
@@ -55,18 +55,18 @@ impactAnalysis {
         runOnlyInChangedModules = false
     }
 
-    // Screenshot тесты
+    // Screenshot tests
     testType(com.impactanalysis.model.TestType.E2E) {
         isEnable = false
         whenChanged("**/compose/**", "**/ui/**")
         runOnlyInChangedModules = true
     }
 
-    // Файлы для линтинга
+    // Files for linting
     lintFileExtensions.set(listOf("kt", "java", "xml"))
 }
 
-// Дополнительные задачи для Android
+// Additional tasks for Android
 tasks.register("runUnitTestsOnly") {
     group = "verification"
     description = "Run only unit tests based on impact analysis"
@@ -96,7 +96,7 @@ tasks.register("runAndroidTests") {
     }
 }
 
-// Lint задачи
+// Lint tasks
 tasks.register("lintImpact") {
     group = "verification"
     description = "Run Android Lint on changed modules"

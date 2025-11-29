@@ -1,4 +1,4 @@
-// Пример конфигурации для Backend (Spring Boot/Ktor) проекта
+// Example configuration for Backend (Spring Boot/Ktor) project
 
 plugins {
     id("com.impactanalysis.plugin") version "1.0.0"
@@ -7,7 +7,7 @@ plugins {
 impactAnalysis {
     baseBranch.set("origin/main")
 
-    // Критические изменения
+    // Critical changes
     criticalPaths.set(
         listOf(
             "build.gradle",
@@ -20,13 +20,13 @@ impactAnalysis {
 
     runAllTestsOnCriticalChanges.set(true)
 
-    // Unit тесты
+    // Unit tests
     unitTests {
         whenChanged("src/main/**", "src/test/**")
         runOnlyInChangedModules = false
     }
 
-    // Integration тесты (с базой данных, кэшем и т.д.)
+    // Integration tests (with database, cache, etc.)
     integrationTests {
         whenChanged(
             "**/repository/**",
@@ -38,7 +38,7 @@ impactAnalysis {
         runOnlyInChangedModules = false
     }
 
-    // API тесты (контроллеры, endpoints)
+    // API tests (controllers, endpoints)
     apiTests {
         whenChanged(
             "**/controller/**",
@@ -50,7 +50,7 @@ impactAnalysis {
         runOnlyInChangedModules = true
     }
 
-    // Contract тесты (Spring Cloud Contract, Pact)
+    // Contract tests (Spring Cloud Contract, Pact)
     testType(com.impactanalysis.model.TestType.CONTRACT) {
         whenChanged(
             "**/api/**",
@@ -60,7 +60,7 @@ impactAnalysis {
         runOnlyInChangedModules = false
     }
 
-    // Performance тесты
+    // Performance tests
     testType(com.impactanalysis.model.TestType.PERFORMANCE) {
         whenChanged(
             "**/service/**",
@@ -73,7 +73,7 @@ impactAnalysis {
     lintFileExtensions.set(listOf("kt", "java", "yaml", "yml", "properties"))
 }
 
-// Задачи для backend
+// Backend tasks
 tasks.register("testChangedServices") {
     group = "verification"
     description = "Test only changed services and their dependencies"
@@ -97,7 +97,7 @@ tasks.register("integrationTestImpact") {
     }
 }
 
-// Проверка миграций базы данных
+// Check database migration changes
 tasks.register("checkDatabaseMigrations") {
     group = "verification"
     description = "Check if database migrations changed"

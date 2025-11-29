@@ -1,99 +1,99 @@
-# 🎯 Текущий статус проекта
+# 🏁 Current Project Status
 
-## ✅ Что исправлено
+## ✅ Fixed Issues
 
-### 1. ❌ → ✅ Проблема с ID плагина
+### 1. ❌ → ✅ Plugin ID Issue
 
-**Было:**
-
-```kotlin
-id = "com.haizerdev.impact-analysis"  // ❌ Gradle преобразует в com.haizerdev.impact_analysis
-```
-
-**Стало:**
+**Before:**
 
 ```kotlin
-id = "com.haizerdev.impactanalysis"  // ✅ Совпадает с package name
+id = "com.haizerdev.impact-analysis"  // ❌ Gradle transforms to com.haizerdev.impact_analysis
 ```
 
-**Результат:** Плагин теперь корректно собирается и может быть опубликован.
+**Now:**
+
+```kotlin
+id = "com.haizerdev.impactanalysis"  // ✅ Matches package name
+```
+
+**Result:** The plugin now builds correctly and can be published.
 
 ---
 
-### 2. ❌ → ✅ Понимание триггеров GitHub Actions
+### 2. ❌ → ✅ Understanding GitHub Action Triggers
 
-**Было непонятно:** Почему `test.yml` запускается, а `publish.yml` нет?
+**Issue:** Why does `test.yml` run, but `publish.yml` does not?
 
-**Объяснение:**
+**Explanation:**
 
-- `test.yml` запускается при **push в ветки** `main`, `develop`
-- `publish.yml` запускается только при **push тегов** формата `v*`
+- `test.yml` runs on **push to branches** `main`, `develop`
+- `publish.yml` runs only on **push of tags** formatted as `v*`
 
-**Решение:** Создание и пуш тегов (`v1.0.1`, `v1.0.2`, `v1.0.3`)
-
----
-
-### 3. ✅ Workflow временно отключен от публикации
-
-**Причина:** Отсутствуют секреты `GRADLE_PUBLISH_KEY` и `GRADLE_PUBLISH_SECRET`
-
-**Решение:** Добавлен `if: false` в шаг публикации, чтобы workflow мог запуститься и создать GitHub Release без
-публикации на Portal.
+**Solution:** Create and push tags (`v1.0.1`, `v1.0.2`, `v1.0.3`)
 
 ---
 
-## 📋 Что нужно сделать для полной публикации
+### 3. ✅ Workflow Temporarily Disabled for Publishing
 
-### Шаг 1: Получить API ключи
+**Reason:** No secrets set for `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET`
 
-1. Зайти на https://plugins.gradle.org/
-2. Войти через GitHub
-3. Перейти в https://plugins.gradle.org/u/me
-4. Создать API Key
-5. Сохранить **Key** и **Secret**
+**Solution:** Added `if: false` to the publishing step so workflow can run and create a GitHub Release without actual
+portal publication.
 
-### Шаг 2: Добавить секреты в GitHub
+---
 
-1. Открыть https://github.com/haizerdev/Impact-analysis-gradle-plugin/settings/secrets/actions
-2. Добавить два секрета:
-    - `GRADLE_PUBLISH_KEY` - ваш Key
-    - `GRADLE_PUBLISH_SECRET` - ваш Secret
+## 📋 Actions for Full Publication
 
-### Шаг 3: Включить публикацию в workflow
+### Step 1: Get API Keys
 
-В файле `.github/workflows/publish.yml` изменить:
+1. Go to https://plugins.gradle.org/
+2. Sign in with GitHub
+3. Visit https://plugins.gradle.org/u/me
+4. Create API Key
+5. Save **Key** and **Secret**
+
+### Step 2: Add Github Secrets
+
+1. Open https://github.com/haizerdev/Impact-analysis-gradle-plugin/settings/secrets/actions
+2. Add two secrets:
+   - `GRADLE_PUBLISH_KEY` - your Key
+   - `GRADLE_PUBLISH_SECRET` - your Secret
+
+### Step 3: Enable Publishing in Workflow
+
+In `.github/workflows/publish.yml`, change:
 
 ```yaml
 if: false  # Temporarily disabled
 ```
 
-На:
+To:
 
 ```yaml
 if: true  # Secrets configured
 ```
 
-Или удалить строку `if: false` полностью.
+Or remove the `if: false` line entirely.
 
-### Шаг 4: Создать новый тег и опубликовать
+### Step 4: Create New Tag and Publish
 
 ```bash
-# Обновить версию в build.gradle.kts
+# Update version in build.gradle.kts
 version = "1.0.4"
 
-# Коммит и пуш
+# Commit and push
 git add build.gradle.kts
 git commit -m "chore: bump version to 1.0.4"
 git push origin main
 
-# Создать и запушить тег
+# Create and push tag
 git tag -a v1.0.4 -m "Release v1.0.4 - First public release"
 git push origin v1.0.4
 ```
 
 ---
 
-## 📊 Текущая конфигурация
+## 📈 Current Configuration
 
 ### Build Gradle
 
@@ -104,7 +104,7 @@ version = "1.0.3"
 gradlePlugin {
     plugins {
         create("impactAnalysisPlugin") {
-            id = "com.haizerdev.impactanalysis"  // ✅ Правильный ID
+           id = "com.haizerdev.impactanalysis"  // ✅ Correct ID
             implementationClass = "com.haizerdev.impactanalysis.ImpactAnalysisPlugin"
             displayName = "Impact Analysis Plugin"
             description = "Gradle plugin for automatic Git changes analysis..."
@@ -115,45 +115,46 @@ gradlePlugin {
 
 ### GitHub Actions
 
-- ✅ `test.yml` - работает при push в main/develop
-- ⚠️ `publish.yml` - работает при push тегов, но публикация временно отключена
+- ✅ `test.yml` - runs on push to main/develop
+- ⚠️ `publish.yml` - runs on tag push, but publishing is temporarily disabled
 
-### Теги
+### Tags
 
-- `v1.0.1` - первая попытка публикации (была ошибка с ID)
-- `v1.0.2` - исправление ID плагина (была ошибка с секретами)
-- `v1.0.3` - workflow работает, но публикация отключена ✅
+- `v1.0.1` - first publication attempt (ID error)
+- `v1.0.2` - fix plugin ID (error with secrets)
+- `v1.0.3` - workflow works, publication disabled ✅
 
 ---
 
-## 🔗 Полезные ссылки
+## 🔗 Useful Links
 
-- **Репозиторий:** https://github.com/haizerdev/Impact-analysis-gradle-plugin
+- **Repository:** https://github.com/haizerdev/Impact-analysis-gradle-plugin
 - **GitHub Actions:** https://github.com/haizerdev/Impact-analysis-gradle-plugin/actions
-- **Инструкция по настройке:** [PUBLISH_SETUP.md](PUBLISH_SETUP.md)
-- **Gradle Plugin Portal:** https://plugins.gradle.org/plugin/com.haizerdev.impactanalysis (будет доступен после публикации)
+- **Publication Setup Guide:** [PUBLISH_SETUP.md](PUBLISH_SETUP.md)
+- **Gradle Plugin Portal:** https://plugins.gradle.org/plugin/com.haizerdev.impactanalysis (will be available after
+  publication)
 
 ---
 
-## 🎉 Итог
+## 🎉 Summary
 
-### Проблемы решены:
+### Issues Resolved:
 
-1. ✅ Исправлен ID плагина (убран дефис)
-2. ✅ Понятно, почему не запускался publish workflow (нужны теги)
-3. ✅ Workflow теперь может работать без секретов (создает Release)
+1. ✅ Fixed plugin ID (removed dash)
+2. ✅ Understood why publish workflow was not running (tags required)
+3. ✅ Workflow now works without secrets (creates Release)
 
-### Для полной публикации нужно:
+### For full publication you need:
 
-1. ⏳ Получить API ключи от Gradle Plugin Portal
-2. ⏳ Добавить секреты в GitHub
-3. ⏳ Включить публикацию в workflow
-4. ⏳ Создать новый тег
+1. ⏳ Get API keys from Gradle Plugin Portal
+2. ⏳ Add secrets in GitHub
+3. ⏳ Enable publishing in workflow
+4. ⏳ Create new tag
 
-**Все технические препятствия устранены! Осталось только настроить доступы к Gradle Plugin Portal.**
+**All technical blockers are resolved! Only access configuration for Gradle Plugin Portal is left.**
 
 ---
 
-**Последнее обновление:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+**Last update:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 
-**Статус:** 🟡 Готов к публикации после настройки API ключей
+**Status:** 🟡 Ready for publication after API key setup

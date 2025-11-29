@@ -1,27 +1,27 @@
-// Пример конфигурации для простого multi-module проекта
+// Example configuration for simple multi-module project
 
 plugins {
     id("com.impactanalysis.plugin") version "1.0.0"
 }
 
 impactAnalysis {
-    // Сравниваем с main веткой
+    // Comparing with main branch
     baseBranch.set("origin/main")
 
-    // Включаем анализ uncommitted изменений
+    // Include analysis of uncommitted changes
     includeUncommittedChanges.set(true)
 
-    // Unit тесты запускаются для всех измененных модулей и их зависимых
+    // Unit tests run for all changed modules and their dependencies
     unitTests {
         whenChanged("src/main/**", "src/test/**")
         runOnlyInChangedModules = false
     }
 
-    // Файлы для линтинга
+    // Files for linting
     lintFileExtensions.set(listOf("kt", "java"))
 }
 
-// Интеграция с detekt
+// Integration with detekt
 tasks.register("detektChangedFiles") {
     group = "verification"
     description = "Run detekt only on changed files"

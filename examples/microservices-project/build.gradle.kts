@@ -1,5 +1,5 @@
-// Пример конфигурации для Microservices проекта
-// Структура:
+// Example configuration for Microservices project
+// Structure:
 // - services/user-service
 // - services/order-service
 // - services/payment-service
@@ -13,7 +13,7 @@ plugins {
 impactAnalysis {
     baseBranch.set("origin/main")
 
-    // Критические изменения в shared библиотеках
+    // Critical changes in shared libraries
     criticalPaths.set(
         listOf(
             "libs/common/**",
@@ -25,13 +25,13 @@ impactAnalysis {
 
     runAllTestsOnCriticalChanges.set(true)
 
-    // Unit тесты каждого сервиса
+    // Unit tests for each service
     unitTests {
         whenChanged("src/main/**")
         runOnlyInChangedModules = false
     }
 
-    // Integration тесты (с БД, кэшем, message broker)
+    // Integration tests (with DB, cache, message broker)
     integrationTests {
         whenChanged(
             "**/repository/**",
@@ -42,7 +42,7 @@ impactAnalysis {
         runOnlyInChangedModules = true
     }
 
-    // API Contract тесты (между сервисами)
+    // API Contract tests (between services)
     testType(com.impactanalysis.model.TestType.CONTRACT) {
         whenChanged(
             "**/api/**",
@@ -53,7 +53,7 @@ impactAnalysis {
         runOnlyInChangedModules = false
     }
 
-    // E2E тесты (между несколькими сервисами)
+    // E2E tests (between multiple services)
     e2eTests {
         whenChanged("services/**")
         runOnlyInChangedModules = false
@@ -62,7 +62,7 @@ impactAnalysis {
     lintFileExtensions.set(listOf("kt", "java", "yaml", "json"))
 }
 
-// Определить какие сервисы изменились
+// Determine which services have changed
 tasks.register("detectChangedServices") {
     group = "impact analysis"
     description = "Detect which microservices have changes"
@@ -89,10 +89,10 @@ tasks.register("detectChangedServices") {
                 println("No services changed")
             } else {
                 changedServices.forEach { service ->
-                    println("  🔄 $service")
+                    println("  $service")
                 }
 
-                // Сохраняем список для CI/CD
+                // Save list for Continuous Integration/Continuous Deployment
                 file("build/changed-services.txt")
                     .writeText(changedServices.joinToString("\n"))
             }
@@ -102,7 +102,7 @@ tasks.register("detectChangedServices") {
     }
 }
 
-// Запустить тесты только для измененных сервисов
+// Run tests only for changed microservices
 tasks.register("testChangedMicroservices") {
     group = "verification"
     description = "Test only changed microservices"
@@ -123,7 +123,7 @@ tasks.register("testChangedMicroservices") {
     }
 }
 
-// Собрать Docker образы только для измененных сервисов
+// Build Docker images only for changed services
 tasks.register("buildChangedServiceImages") {
     group = "build"
     description = "Build Docker images only for changed services"
@@ -147,7 +147,7 @@ tasks.register("buildChangedServiceImages") {
     }
 }
 
-// Contract тесты между сервисами
+// Contract tests between services
 tasks.register("verifyServiceContracts") {
     group = "verification"
     description = "Verify API contracts between services"
@@ -162,7 +162,7 @@ tasks.register("verifyServiceContracts") {
                 com.impactanalysis.model.ImpactAnalysisResult::class.java
             )
 
-            // Если изменились контракты или клиенты API
+            // If contract or API client files changed
             val hasContractChanges = result.changedFiles.any {
                 it.path.contains("/api/") ||
                         it.path.contains("/contract/") ||
@@ -170,7 +170,7 @@ tasks.register("verifyServiceContracts") {
             }
 
             if (hasContractChanges) {
-                println("⚠️  API contracts changed - running contract tests")
+                println("API contracts changed - running contract tests")
                 exec {
                     commandLine(
                         "./gradlew", "runImpactTests",

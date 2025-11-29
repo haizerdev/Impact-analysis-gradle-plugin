@@ -106,9 +106,9 @@ abstract class RunImpactTestsTask @Inject constructor(
         try {
             // Run all tasks in a single Gradle command (parallel execution)
             val command = if (isWindows) {
-                listOf("cmd", "/c", "gradlew.bat") + sortedTasks + listOf("--continue", "--no-daemon")
+                listOf("cmd", "/c", "gradlew.bat") + sortedTasks + listOf("--continue", "--no-daemon", "--parallel")
             } else {
-                listOf("./gradlew") + sortedTasks + listOf("--continue", "--no-daemon")
+                listOf("./gradlew") + sortedTasks + listOf("--continue", "--no-daemon", "--parallel")
             }
 
             val execResult = execOperations.exec { spec ->
