@@ -455,7 +455,7 @@ class SerializedTestScopeCalculator(
 
         if (hasCriticalChanges && config.runAllTestsOnCriticalChanges) {
             // Run all tests in all modules
-            return getAllTestsForModules(allAffectedModules)
+            return getAllTestsForModules(allAffectedModules).filterDisabledTestTypes()
         }
 
         // Determine test types for each affected module
@@ -484,8 +484,10 @@ class SerializedTestScopeCalculator(
             result[TestType.UNIT] = generateTestTasks(allAffectedModules, TestType.UNIT)
         }
 
-        return result
+        return result.filterDisabledTestTypes()
     }
+
+    private fun Map<TestType, List<String>>.filterDisabledTestTypes(): Map<TestType, List<String>> = filterKeys { config.testTypeRules[it]?.isEnable == true }
 
     /**
      * Get all tests for modules
