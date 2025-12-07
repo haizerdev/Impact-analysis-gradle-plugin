@@ -123,25 +123,30 @@ abstract class CalculateImpactTask : DefaultTask() {
         val scriptDir = outputFile.get().asFile.parentFile
         val pythonScript = java.io.File(scriptDir, "impact_tests_launcher.py")
         val bashScript = java.io.File(scriptDir, "run_impact_tests.sh")
+        val compilerScript = java.io.File(scriptDir, "compile_impact.sh")
 
         val runMode = mode.get()
         when (runMode) {
             ImpactRunMode.PYTHON -> {
                 // Удаляем bash-скрипт если был
                 if (bashScript.exists()) bashScript.delete()
+                if (compilerScript.exists()) compilerScript.delete()
                 copyBuiltinPythonScript()
             }
 
             ImpactRunMode.BASH -> {
                 // Удаляем python скрипт если был
                 if (pythonScript.exists()) pythonScript.delete()
+                if (compilerScript.exists()) compilerScript.delete()
                 prepareBashLauncher()
+                prepareBashCompiler()
             }
 
             else -> {
                 // Если выбран gradle — удаляем оба скрипта как неактуальные
                 if (pythonScript.exists()) pythonScript.delete()
                 if (bashScript.exists()) bashScript.delete()
+                if (compilerScript.exists()) compilerScript.delete()
             }
         }
 
@@ -351,6 +356,116 @@ abstract class CalculateImpactTask : DefaultTask() {
         bashScript.writeText(template)
         bashScript.setExecutable(true)
         logger.lifecycle("Generated bash script to run impacted tests: ${bashScript.absolutePath}")
+    }
+
+    /**
+     * Generates a bash script to compile affected modules (compile_impact.sh)
+     */
+    private fun prepareBashCompiler() {
+        val resultFile = outputFile.get().asFile
+        if (!resultFile.exists()) return
+        val resultJson = resultFile.readText()
+        val affectedModules: Set<String>
+        val report: ImpactReport?
+
+        try {
+            val gson = Gson()
+            val result = gson.fromJson(resultJson, ImpactAnalysisResult::class.java)
+            affectedModules = result.affectedModules
+            report = result.report
+        } catch (t: Throwable) {
+            logger.warn("Failed to parse result.json for bash compiler: $t")
+            return
+        }
+
+        if (affectedModules.isEmpty()) {
+            logger.lifecycle("No affected modules to compile, so no bash compiler script generated.")
+            return
+        }
+
+        // Generate compilation tasks for affected modules
+        // For Android modules: assemble tasks (assembleDebug, assembleRelease)
+        // For JVM modules: build or classes tasks
+        val compileTasks = mutableListOf<String>()
+
+        affectedModules.forEach { modulePath ->
+            // Try to determine if it's an Android module or JVM module
+            val moduleDir = SerializedDependencyAnalyzer(
+                rootDir = rootProjectDir.get().asFile,
+                moduleDirectories = moduleDirectories.get()
+            ).getAbsoluteModuleDir(modulePath)
+
+            if (moduleDir != null && moduleDir.exists()) {
+                val hasBuildGradle = moduleDir.resolve("build.gradle").exists() ||
+                        moduleDir.resolve("build.gradle.kts").exists()
+
+                if (hasBuildGradle) {
+                    // Check for Android plugin
+                    val buildFile = if (moduleDir.resolve("build.gradle.kts").exists()) {
+                        moduleDir.resolve("build.gradle.kts")
+                    } else {
+                        moduleDir.resolve("build.gradle")
+                    }
+
+                    val buildContent = buildFile.readText()
+                    val isAndroidModule = buildContent.contains("com.android.application") ||
+                            buildContent.contains("com.android.library") ||
+                            buildContent.contains("android {")
+
+                    // Generate appropriate compile task
+                    val taskName = when {
+                        isAndroidModule && androidUnitTestVariant.get().isNotEmpty() -> {
+                            // For Android modules, use assemble with variant
+                            val variant = androidUnitTestVariant.get()
+                            "assemble${variant.replaceFirstChar { it.uppercase() }}"
+                        }
+
+                        isAndroidModule -> "assembleDebug" // Default to Debug
+                        else -> "classes" // For JVM modules, compile classes
+                    }
+
+                    compileTasks.add("$modulePath:$taskName")
+                }
+            }
+        }
+
+        if (compileTasks.isEmpty()) {
+            logger.lifecycle("No compilation tasks generated for affected modules.")
+            return
+        }
+
+        val bashScript = outputFile.get().asFile.parentFile.resolve("compile_impact.sh")
+        val newLineSeparator = " \\"
+
+        val template = StringBuilder()
+            .appendLine("#!/bin/bash")
+            .appendLine("# This script was generated by the Impact Analysis Plugin.")
+            .appendLine("# Use this script to compile the affected modules: ./build/impact-analysis/compile_impact.sh")
+            .appendLine("")
+            .appendLine("# Impact Analysis - Compilation Report")
+            .apply {
+                if (report != null) {
+                    appendLine("echo '========================================='")
+                    appendLine("echo 'Impact Analysis - Compilation Report'")
+                    appendLine("echo '========================================='")
+                    appendLine("echo 'Affected modules to compile: ${affectedModules.size}'")
+                    appendLine("echo 'Compilation tasks: ${compileTasks.size}'")
+                    appendLine("echo '========================================='")
+                    appendLine("echo ''")
+                }
+            }
+            .appendLine("./gradlew$newLineSeparator")
+            .apply {
+                compileTasks.forEach { task ->
+                    appendLine("$task$newLineSeparator")
+                }
+            }
+            .appendLine("--parallel")
+            .toString()
+
+        bashScript.writeText(template)
+        bashScript.setExecutable(true)
+        logger.lifecycle("Generated bash script to compile affected modules: ${bashScript.absolutePath}")
     }
 
     private fun saveResult(result: ImpactAnalysisResult) {
